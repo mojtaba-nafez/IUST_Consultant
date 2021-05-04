@@ -36,3 +36,23 @@ class UserSignupAPI(ObtainAuthToken):
                 return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ConsultantSignupAPI(ObtainAuthToken):
+    permission_classes = [AllowAny]
+
+    def post(self, request, **kwargs):
+        try:
+            consultant_serializer = ConsultantProfileSerializer(data=request.data)
+            if consultant_serializer.is_valid():
+                user = consultant_serializer.save()
+                consultant_serializer = ConsultantProfileSerializer(user)
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'data': consultant_serializer.data,
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': consultant_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
