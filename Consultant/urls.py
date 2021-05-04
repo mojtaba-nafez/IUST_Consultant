@@ -23,6 +23,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('User.user_urls')),
     path('consultant/', include('User.consultant_urls')),
+    path('profile/', views.UserProfileAPI.as_view(), name="user profile"),
+    path('profile/<str:username>/', views.AnotherUserProfileAPI.as_view(), name="another user profile"),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
