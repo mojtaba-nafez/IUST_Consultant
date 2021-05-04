@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'User',
     'calendar_',
     'channel',
+    'chat_room'
 ]
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 
