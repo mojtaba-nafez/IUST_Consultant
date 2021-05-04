@@ -277,3 +277,41 @@ class ChannelSubscribers(APIView):
 
 
 
+class ChannelAdmins(APIView):
+    permission_classes = []
+    def get(self, request, channelId, format=None):
+        try:
+            if len(Channel.objects.filter(pk=channelId))==0:
+                return Response("channel not exist!", status=status.HTTP_404_NOT_FOUND)
+            channel =  list(Channel.objects.filter(pk=channelId))
+            if len(channel)==0:
+                return Response("User has not create channel before!", status=status.HTTP_404_NOT_FOUND)
+            channel_ = channel[0]
+            
+            admins = UserProfile.objects.filter(consultantprofile=channel_.consultant)
+            data = []
+            for i in range(len(admins)):
+                data.append({
+                    'name': admins[i].email,
+                    'username': admins[i].username,
+                    'user_type': admins[i].user_type,
+                    'avatar': admins[i].avatar.url if admins[i].avatar else None,
+                })
+            main_data = {
+                'admin': data,
+                'consultant': {
+                    'name': channel_.consultant.email,
+                    'username': channel_.consultant.username,
+                    'user_type': channel_.consultant.user_type,
+                    'avatar': channel_.consultant.avatar.url if channel_.consultant.avatar else None,
+                }
+            }
+            return Response({'data': main_data}, status=status.HTTP_200_OK)
+        except:
+            return Response({'status': "Internal Server Error, We'll Check it later!"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+

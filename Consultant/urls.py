@@ -18,4 +18,6 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('channel/', include('channel.urls')),
+    path('swagger/', views.SwaggerUI.as_view(), name='swagger-ui')
 ]
