@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'channel',
     'chat_room',
     'message',
+    'request',
 ]
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 
