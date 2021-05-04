@@ -38,6 +38,39 @@ class UserSignupAPI(ObtainAuthToken):
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class LoginAPI(ObtainAuthToken):
+    permission_classes = []
+
+    def post(self, request, **kwargs):
+        try:
+            serializer = LoginSerializer(data=request.data)
+            if serializer.is_valid():
+                # TODO: WRITE NATIVE QUERY HERE , USERNAME OR EMAIL
+                user = BaseUser.objects.filter(username=serializer.validated_data['email_username'])
+                if len(user) == 0:
+                    user = BaseUser.objects.filter(email=serializer.validated_data['email_username'])
+                if len(user) == 0:
+                    return Response({'error': 'This user not found'}, status=status.HTTP_400_BAD_REQUEST)
+                if user[0].password != serializer.validated_data['password']:
+                    return Response({'error': 'The password is not true'}, status=status.HTTP_400_BAD_REQUEST)
+                token, created = Token.objects.get_or_create(user=user[0])
+                if user[0].user_type == "normal_user":
+                    user = UserProfile.objects.filter(baseuser_ptr=user[0])
+                    return_data = UserProfileSerializer(user[0])
+                else:
+                    user = ConsultantProfile.objects.filter(baseuser_ptr=user[0])
+                    return_data = ConsultantProfileSerializer(user[0])
+
+                return Response({
+                    'token': token.key,
+                    'data': return_data.data,
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class ConsultantSignupAPI(ObtainAuthToken):
     permission_classes = [AllowAny]
 
