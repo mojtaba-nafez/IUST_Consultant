@@ -118,3 +118,63 @@ class ApplicantRequestAPI(APIView):
                 return Response({"error": "Request type is not valid"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ResponderRequestAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        request_id = request.data['id']
+        try:
+            if request.data['request_type'] == 'secretary':
+                user_request = SecretaryRequest.objects.filter(id=request_id, target_user=request.user).select_related(
+                    'consultant')
+            elif request.data['request_type'] == 'join_channel':
+                user_request = JoinChannelRequest.objects.filter(id=request_id,
+                                                                 target_user=request.user).select_related(
+                    'channel')
+            else:
+                return Response({"error": "request type is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+            if len(user_request) == 0:
+                return Response({"error": "RequestId is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+
+            answer_serializer = AnswerSerializer(user_request[0], data=request.data)
+            if answer_serializer.is_valid():
+                answer_serializer.save()
+                if answer_serializer.validated_data['accept'] and request.data['request_type'] == 'secretary':
+                    user_request[0].channel.consultant.my_secretaries.add(request.user)
+                if answer_serializer.validated_data['accept'] and request.data['request_type'] == 'join_channel':
+                    user_request[0].channel.subscribers.add(request.user)
+                return Response(answer_serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": answer_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request, format=None):
+        try:
+            secretary_requests = SecretaryRequest.objects.filter(target_user=request.user, answer_date=None).order_by(
+                '-id')
+            join_requests = JoinChannelRequest.objects.filter(target_user=request.user, answer_date=None).order_by(
+                '-id')
+            return Response(AnswerSerializer(list(secretary_requests) + list(join_requests), many=True).data,
+                            status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# class JoinChannelRequestAPI(APIView):
+#     # def get(self, request, format=None):
+#     #     try:
+#     #         join_requests = JoinChannelRequest.objects.filter(creator=request.user)
+#     #         if len(consultant) == 0:
+#     #             return Response("Channel id is not valid", status=status.HTTP_400_BAD_REQUEST)
+#     #         if channel[0].consultant.baseuser_ptr_id != request.user.id and len(
+#     #                 ConsultantProfile.my_secretaries.through.objects.filter(
+#     #                     consultantprofile_id=channel[0].consultant.id, userprofile_id=request.user.id)) == 0:
+#     #             return Response({"error": "You dont have permission for this request"},
+#     #                             status=status.HTTP_403_FORBIDDEN)
+#     #         join_requests = Request.objects.filter(consultant=channel[0].consultant,
+#     #                                                request_type="join_channel").order_by("-id")
+#     #         return Response(AnswerSerializer(join_requests, many=True).data, status=status.HTTP_200_OK)
+#     #     except Exception as server_error:
+#     #         return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
