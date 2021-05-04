@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'chat_room',
     'message',
     'request',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 
