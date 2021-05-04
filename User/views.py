@@ -71,6 +71,17 @@ class LoginAPI(ObtainAuthToken):
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class LogoutAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            request.user.auth_token.delete()
+            return Response(status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class ConsultantSignupAPI(ObtainAuthToken):
     permission_classes = [AllowAny]
 
