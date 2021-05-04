@@ -100,3 +100,39 @@ class ConsultantSignupAPI(ObtainAuthToken):
                 return Response({'error': consultant_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserProfileAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            consultant = ConsultantProfile.objects.filter(baseuser_ptr=request.user)
+            if len(consultant) != 0:
+                consultant_serializer = ConsultantProfileSerializer(consultant[0])
+                return Response(consultant_serializer.data, status=status.HTTP_200_OK)
+            user = UserProfile.objects.filter(baseuser_ptr=request.user)
+            user_serializer = UserProfileSerializer(user[0])
+            return Response(user_serializer.data, status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request):
+        try:
+            consultant = ConsultantProfile.objects.filter(baseuser_ptr=request.user)
+            if len(consultant) != 0:
+                consultant_serializer = BaseUserSerializer(consultant[0], request.data)
+                if consultant_serializer.is_valid():
+                    consultant_serializer.save()
+                    return Response(consultant_serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": consultant_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            user = UserProfile.objects.filter(baseuser_ptr=request.user)
+            user_serializer = BaseUserSerializer(user[0], request.data)
+            if user_serializer.is_valid():
+                user_serializer.save()
+                return Response(user_serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
