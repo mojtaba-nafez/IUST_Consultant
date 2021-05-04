@@ -186,4 +186,94 @@ class UserRoleInChannelAPI(APIView):
 
 
 
+class ChannelSubscriptionAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        try:
+            user = UserProfile.objects.filter(baseuser_ptr_id=request.user.id)
+            if len(user) == 0:
+                user = ConsultantProfile.objects.filter(baseuser_ptr_id=request.user.id)
+
+            user = user[0]
+            subscription_serializer = ChannelSubscriptionSerializer(data=request.data)
+            if subscription_serializer.is_valid():
+                channel = Channel.objects.filter(
+                    invite_link=subscription_serializer.validated_data['invite_link']).select_related('consultant')
+                if len(channel) == 0:
+                    return Response({"error": "Channel with this invite-link is not exists"},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                if channel[0].consultant.baseuser_ptr_id == request.user.id:
+                    return Response({"error": "You are consultant of this channel!!!"},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                if len(ConsultantProfile.my_secretaries.through.objects.filter(
+                        consultantprofile_id=channel[0].consultant.id, userprofile_id=request.user.id)) != 0:
+                    return Response({"error": "You are secretary of this channel!!!"},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                subscriber = Subscription(user=user, channel=channel[0])
+                subscriber.save()
+                return Response(
+                    data="ok",
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response({"error": subscription_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+class ChannelSubscribers(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, channelId, format=None):
+        try:
+            channel_ = list(Channel.objects.filter(pk=channelId))
+            if len(channel_) == 0:
+                return Response("channel not exist!", status=status.HTTP_404_NOT_FOUND)
+            channel_ = channel_[0]
+            if channel_.consultant.id != request.user.id and (
+                    request.user not in UserProfile.objects.filter(consultantprofile=channel_.consultant)):
+                return Response("You do not have permission to perform this action", status=status.HTTP_403_FORBIDDEN)
+            sb = Subscription.objects.filter(channel=channel_)
+            data = []
+            for i in range(len(sb)):
+                data.append({
+                    'email': sb[i].user.email,
+                    'username': sb[i].user.username,
+                    'user_type': sb[i].user.user_type,
+                    'avatar': sb[i].user.avatar.url if sb[i].user.avatar else None,
+                })
+            return Response({'data': data}, status=status.HTTP_200_OK)
+        except:
+            return Response({'status': "Internal Server Error, We'll Check it later!"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def delete(self, request, channelId, format=None):
+        try:
+            query = request.GET['username']  # string
+            # print("")
+            serializer = DeleteSubscriberSerializer(data=request.data)
+            if serializer.is_valid():
+                username = serializer.data.get('username')               
+                channels=list(Channel.objects.filter(pk=channelId))
+                if len(channels)==0:
+                    return Response("channel not exist!", status=status.HTTP_404_NOT_FOUND)
+                if channels[0].consultant.id != request.user.id and (request.user not in UserProfile.objects.filter(consultantprofile=channels[0].consultant)):
+                    return Response("You do not have permission to perform this action", status=status.HTTP_403_FORBIDDEN)
+                
+                value =Subscription.objects.filter(user__username=username, channel=channels[0]).delete()
+                if value[0] == 0:
+                    return Response("this user is not a subscriber of this channel!", status=status.HTTP_404_NOT_FOUND)
+
+                return Response({'status': 'OK'}, status=status.HTTP_200_OK)
+            return Response({'status': 'Bad Request.'}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'status': "Internal Server Error, We'll Check It Later"},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 
