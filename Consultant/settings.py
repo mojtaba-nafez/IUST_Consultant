@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'User',
     'calendar_',
+    'channel',
 ]
 REST_FRAMEWORK = { 'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema' }
 
