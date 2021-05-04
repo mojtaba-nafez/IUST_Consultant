@@ -26,6 +26,7 @@ urlpatterns = [
     path('profile/', views.UserProfileAPI.as_view(), name="user profile"),
     path('profile/<str:username>/', views.AnotherUserProfileAPI.as_view(), name="another user profile"),
     path('channel-message/<int:channelId>/', include('message.urls')),
+    path('request/', include('request.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
