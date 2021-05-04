@@ -114,5 +114,76 @@ class EditChannel(APIView):
                                 
 
 
+class UserChannelsAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        try:
+            user_is_subscriber = Channel.objects.filter(subscribers=request.user)
+            user_is_consultant = Channel.objects.filter(consultant=request.user)
+            user_is_secretary = Channel.objects.filter(consultant__my_secretaries=request.user)
+            user_channels = []
+            for channel in user_is_consultant:
+                user_channels += [
+                    {
+                        "id": channel.id,
+                        "name": channel.name,
+                        "description": channel.description,
+                        "invite_link": channel.invite_link,
+                        "user_role": "consultant"
+                    }
+                ]
+            for channel in user_is_secretary:
+                user_channels += [
+                    {
+                        "id": channel.id,
+                        "name": channel.name,
+                        "description": channel.description,
+                        "invite_link": channel.invite_link,
+                        "user_role": "secretary"
+                    }
+                ]
+            for channel in user_is_subscriber:
+                user_channels += [
+                    {
+                        "id": channel.id,
+                        "name": channel.name,
+                        "description": channel.description,
+                        "invite_link": channel.invite_link,
+                        "user_role": "subscriber"
+                    }
+                ]
+            return Response(user_channels, status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class UserRoleInChannelAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, channelId, format=None):
+        try:
+            channel = Channel.objects.filter(id=channelId).select_related('consultant')
+            if len(channel) == 0:
+                return Response({"error": "This channel id is not exits"}, status=status.HTTP_400_BAD_REQUEST)
+            if channel[0].consultant.id == request.user.id:
+                return Response(data={"role": "consultant", "invite_link": channel[0].invite_link},
+                                status=status.HTTP_200_OK)
+            for secretary in channel[0].consultant.my_secretaries.all():
+                if request.user.id == secretary.id:
+                    return Response(data={"role": "secretary", "invite_link": channel[0].invite_link},
+                                    status=status.HTTP_200_OK)
+            for subscriber in channel[0].subscribers.all():
+                if request.user.id == subscriber.id:
+                    return Response(data={"role": "subscriber", "invite_link": channel[0].invite_link},
+                                    status=status.HTTP_200_OK)
+            return Response(data={"role": "nothing", "invite_link": channel[0].invite_link},
+                            status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
 
