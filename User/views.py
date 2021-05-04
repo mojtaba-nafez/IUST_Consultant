@@ -18,3 +18,21 @@ class SwaggerUI(TemplateView):
     def get(self, request, *args, **kwargs):
         return render(request, 'swagger-ui.html')
 
+
+class UserSignupAPI(ObtainAuthToken):
+    permission_classes = [AllowAny]
+
+    def post(self, request, **kwargs):
+        try:
+            user_serializer = UserProfileSerializer(data=request.data)
+            if user_serializer.is_valid():
+                user = user_serializer.save()
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({
+                    'token': token.key,
+                    'data': user_serializer.validated_data,
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
