@@ -136,3 +136,25 @@ class UserProfileAPI(APIView):
                 return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AnotherUserProfileAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, username):
+        try:
+            user = ConsultantProfile.objects.filter(username=username)
+            if len(user) != 0:
+                user_serializer = ConsultantProfileSerializer(user[0])
+            else:
+                user = UserProfile.objects.filter(username=username)
+                if len(user) == 0:
+                    return Response({"error": "This username not found"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    user_serializer = UserProfileSerializer(user[0])
+            user_profile = user_serializer.data
+            del user_profile['email']
+            del user_profile['phone_number']
+            return Response(user_profile, status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
