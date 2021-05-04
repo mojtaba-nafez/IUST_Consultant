@@ -46,3 +46,30 @@ class SearchChannel(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class SuggestionChannel(APIView):
+    permission_classes = []
+
+    def get(self, request, format=None):
+        try:
+            user_types = ['normal_user', 'Lawyer', 'medical', 'EntranceExam', 'Psychology', 'Immigration','AcademicAdvice']
+            data = {}
+            for user_type in user_types:
+                Channels = list(Channel.objects.filter(consultant__user_type=user_type))[0:15]
+                tmp = []
+                for channel in Channels:
+                    tmp.append({
+                            'name': channel.name,
+                            'consultant_full_name': channel.consultant.first_name + " " + channel.consultant.last_name,
+                            'invite_link': channel.invite_link,
+                            'channelID': channel.pk,
+                            'avatar': channel.avatar.url if channel.avatar else None,
+
+                        })
+                data[user_type]=tmp
+
+            return Response(data, status=status.HTTP_200_OK)
+        except:
+            return Response({'status': "Internal Server Error, We'll Check it later!"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
