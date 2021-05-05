@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from User.models import UserProfile
 from .serializers import *
 
 
@@ -16,7 +17,9 @@ class ApplicantRequestAPI(APIView):
             return Response("You do not have permission to perform this action", status=status.HTTP_403_FORBIDDEN)
         request_serializer = SecretaryRequestSerializer(data=request.data)
         if request_serializer.is_valid():
-            recipient_request = BaseUser.objects.filter(username=request_serializer.validated_data['target_user'])
+            if request.user.username == request_serializer.validated_data['target_user']:
+                return Response({"error": "Target username is you!!!"}, status=status.HTTP_400_BAD_REQUEST)
+            recipient_request = UserProfile.objects.filter(username=request_serializer.validated_data['target_user'])
             if len(recipient_request) == 0:
                 return Response({"error": "Target username is not valid"}, status=status.HTTP_400_BAD_REQUEST)
             if len(ConsultantProfile.objects.filter(my_secretaries=recipient_request[0])) != 0:
@@ -36,6 +39,8 @@ class ApplicantRequestAPI(APIView):
     def create_join_channel_request(self, request):
         request_serializer = JoinChannelRequestSerializer(data=request.data)
         if request_serializer.is_valid():
+            if request.user.username == request_serializer.validated_data['target_user']:
+                return Response({"error": "Target username is you!!!"}, status=status.HTTP_400_BAD_REQUEST)
             channel = Channel.objects.filter(id=request_serializer.validated_data['channel'])
             if len(channel) == 0:
                 return Response("Channel id is not valid", status=status.HTTP_400_BAD_REQUEST)
@@ -128,7 +133,7 @@ class ResponderRequestAPI(APIView):
         try:
             if request.data['request_type'] == 'secretary':
                 user_request = SecretaryRequest.objects.filter(id=request_id, target_user=request.user).select_related(
-                    'consultant')
+                    'channel')
             elif request.data['request_type'] == 'join_channel':
                 user_request = JoinChannelRequest.objects.filter(id=request_id,
                                                                  target_user=request.user).select_related(
@@ -140,11 +145,11 @@ class ResponderRequestAPI(APIView):
 
             answer_serializer = AnswerSerializer(user_request[0], data=request.data)
             if answer_serializer.is_valid():
-                answer_serializer.save()
                 if answer_serializer.validated_data['accept'] and request.data['request_type'] == 'secretary':
-                    user_request[0].channel.consultant.my_secretaries.add(request.user)
+                    user_request[0].channel.consultant.my_secretaries.add(secretary)
                 if answer_serializer.validated_data['accept'] and request.data['request_type'] == 'join_channel':
                     user_request[0].channel.subscribers.add(request.user)
+                user_request[0].delete()
                 return Response(answer_serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response({"error": answer_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
