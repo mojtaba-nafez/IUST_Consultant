@@ -4,9 +4,10 @@ from rest_framework.authtoken.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import *
+from django.db.models import Q
 
 
-class ConsultantTime(APIView):
+class ConsultantTimeAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -32,6 +33,10 @@ class ConsultantTime(APIView):
             consultant_time_serializer = ConsultantTimeSerializer(data=request.data)
             if consultant_time_serializer.is_valid():
                 consultant_time_serializer.validated_data['consultant'] = consultant
+                if len(ConsultantTime.objects.filter(Q(consultant=consultant), Q(
+                        start_date=consultant_time_serializer.validated_data['start_date']) | Q(
+                        end_date=consultant_time_serializer.validated_data['end_date']))) != 0:
+                    return Response({"error": "شما ساعتی مشابه با این ساعت تعریف کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
                 consultant_time = consultant_time_serializer.save()
                 return Response(ConsultantTimeSerializer(consultant_time).data, status=status.HTTP_200_OK)
             else:
