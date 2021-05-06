@@ -28,6 +28,7 @@ urlpatterns = [
     path('channel-message/<int:channelId>/', include('message.urls')),
     path('request/', include('request.urls')),
     path('channel/', include('channel.urls')),
+    path('calendar/', include('calendar_.urls')),
     path('swagger/', views.SwaggerUI.as_view(), name='swagger-ui')
 ]
 
