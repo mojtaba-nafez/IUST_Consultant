@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+
+class ConsultantTimeAdmin(admin.ModelAdmin):
+    list_display = ['consultant', 'user', 'start_date', 'end_date', 'title']
+
+
+admin.site.register(ConsultantTime, ConsultantTimeAdmin)
