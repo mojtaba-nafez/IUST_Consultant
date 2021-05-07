@@ -18,10 +18,18 @@ class ConsultantTimeSerializer(serializers.Serializer):
     description = serializers.CharField(allow_null=True, allow_blank=True, required=False, max_length=500,
                                         error_messages={
                                             "length": "توضیحات حداکثر 500 کاراکتر میتواند باشد",
-                                        },)
+                                        }, )
 
     def create(self, validated_data):
         return ConsultantTime.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.start_date = validated_data.get('start_date', instance.start_date)
+        instance.end_date = validated_data.get('end_date', instance.end_date)
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+        return instance
 
     def validate_start_date(self, start_date):
         if start_date < timezone.now():
