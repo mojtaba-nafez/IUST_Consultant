@@ -9,7 +9,7 @@ from .serializers import *
 from .models import *
 
 class Reserve(APIView):
-    Authenticated =[IsAuthenticated]
+    #Authenticated =[IsAuthenticated]
     def post(self, request, ConsultantID, format=None):
         try:
             ReserveConsultantTimeSerializer(data=request.data)

@@ -30,6 +30,10 @@
     {
       "name": "Channel-Message",
       "description": "Everything about channel-message"
+    },
+    {
+      "name": "Filling-DB",
+      "description": "insert fake data to DB"
     }
   ],
   "schemes": [
@@ -1928,7 +1932,37 @@
           }
         }
       }
-    }
+    },
+     "/fakeData/": {
+            "get": {
+        "tags": [
+          "Filling-DB"
+        ],
+        "summary": "insert fake data to DB",
+        "operationId": "Insert-Data",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
   },
   "securityDefinitions": {
     "Token": {

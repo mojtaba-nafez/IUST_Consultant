@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from channel.models import Channel, Subscription
 from User.models import ConsultantProfile, UserProfile
 from message.models import *
+from rest_framework.authtoken.models import Token
 
 class InsertFakeData(APIView):
     def get(self, request, format=None):
@@ -45,6 +46,7 @@ class InsertFakeData(APIView):
                 try:
                     user = UserProfile.objects.create(username=user_user_name[i], email=user_email[i], password=user_password[i], phone_number=user_phone_number[i],first_name=user_first_name[i], last_name=user_last_name[i])
                     users.append(user)
+                    Token.objects.get_or_create(user=user)
                     print('user '+user_user_name[i]+ ' created')
                 except:
                     pass
@@ -54,6 +56,7 @@ class InsertFakeData(APIView):
             for j in range(len(consultant_username)):
                 try:
                     consultant=ConsultantProfile.objects.create(username=consultant_username[j],user_type=consultant_type[j], phone_number=consultant_phone_number[j], first_name=consultant_first_name[j], last_name=consultant_last_name[j], email=consultant_email[j], password=consultant_password[j], certificate="111")
+                    Token.objects.get_or_create(user=consultant)
                     consultants.append(consultant)
                     print('consultant '+ consultant_username[j]+' created')
                     channel=Channel.objects.create(name=channel_name[j],description= description[j], invite_link=invite_link[j], consultant=consultant)        
