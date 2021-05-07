@@ -5,7 +5,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class ConsultantTime(models.Model):
     consultant = models.ForeignKey(ConsultantProfile, on_delete=models.SET_NULL, null=True, blank=True)
-    user = models.ForeignKey(BaseUser, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(BaseUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="user")
 
     start_date = models.DateTimeField(auto_now=False, auto_now_add=False, null=False, blank=False)
     end_date = models.DateTimeField(auto_now=False, auto_now_add=False, null=False, blank=False)
