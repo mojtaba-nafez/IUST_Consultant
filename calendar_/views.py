@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+from User.models import UserProfile
 from .serializers import *
 from django.db.models import Q
 
@@ -19,12 +21,11 @@ class ConsultantTimeAPI(APIView):
                     return Response({"error": "مشاوری با این شناسه موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     consultant = consultant[0]
-                    secretary = UserProfile.objects.filter(baseuser_ptr=request.user)[0]
-                    if len(ConsultantProfile.my_secretaries.through.objects.filter(consultantprofile=consultant,
-                                                                                   userprofile=secretary)) == 0:
+                    if len(ConsultantProfile.my_secretaries.through.objects.filter(consultantprofile_id=consultant.id,
+                                                                                   userprofile_id=request.user.id)) == 0:
                         return Response({"error": "شما منشی این مشاور نیستید"}, status=status.HTTP_403_FORBIDDEN)
             else:
-                consultant = ConsultantProfile.objects.filter(baseuser_ptr=request.user)
+                consultant = ConsultantProfile.objects.filter(id=request.user.id)
                 if len(consultant) == 0:
                     return Response({"error": "شما مشاور نیستید"}, status=status.HTTP_403_FORBIDDEN)
                 else:
@@ -54,10 +55,10 @@ class ConsultantTimeAPI(APIView):
             else:
                 consultant_time = consultant_time[0]
 
-            if consultant_time.consultant.baseuser_ptr_id != request.user.id and len(
+            if consultant_time.consultant.id != request.user.id and len(
                     ConsultantProfile.my_secretaries.through.objects.filter(
                         consultantprofile_id=consultant_time.consultant.id,
-                        userprofile_baseuser_ptr_id=request.user.id)) == 0:
+                        userprofile_id=request.user.id)) == 0:
                 return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
 
             consultant_time_serializer = ConsultantTimeSerializer(consultant_time, data=request.data)
