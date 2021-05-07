@@ -35,10 +35,34 @@ class ConsultantTimeAPI(APIView):
                 consultant_time_serializer.validated_data['consultant'] = consultant
                 if len(ConsultantTime.objects.filter(Q(consultant=consultant), Q(
                         start_date=consultant_time_serializer.validated_data['start_date']) | Q(
-                        end_date=consultant_time_serializer.validated_data['end_date']))) != 0:
-                    return Response({"error": "شما ساعتی مشابه با این ساعت تعریف کرده اید"}, status=status.HTTP_400_BAD_REQUEST)
+                    end_date=consultant_time_serializer.validated_data['end_date']))) != 0:
+                    return Response({"error": "شما ساعتی مشابه با این ساعت تعریف کرده اید"},
+                                    status=status.HTTP_400_BAD_REQUEST)
                 consultant_time = consultant_time_serializer.save()
                 return Response(ConsultantTimeSerializer(consultant_time).data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": consultant_time_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, ConsultantTimeId, ):
+        try:
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related("consultant")
+            if len(consultant_time) == 0:
+                return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                consultant_time = consultant_time[0]
+
+            if consultant_time.consultant.baseuser_ptr_id != request.user.id and len(
+                    ConsultantProfile.my_secretaries.through.objects.filter(
+                        consultantprofile_id=consultant_time.consultant.id,
+                        userprofile_baseuser_ptr_id=request.user.id)) == 0:
+                return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+
+            consultant_time_serializer = ConsultantTimeSerializer(consultant_time, data=request.data)
+            if consultant_time_serializer.is_valid():
+                consultant_time_serializer.save()
+                return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response({"error": consultant_time_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
