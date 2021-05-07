@@ -33,6 +33,7 @@ class ConsultantTimeAPI(APIView):
             consultant_time_serializer = ConsultantTimeSerializer(data=request.data)
             if consultant_time_serializer.is_valid():
                 consultant_time_serializer.validated_data['consultant'] = consultant
+                # TODO check similar consultant times
                 if len(ConsultantTime.objects.filter(Q(consultant=consultant), Q(
                         start_date=consultant_time_serializer.validated_data['start_date']) | Q(
                     end_date=consultant_time_serializer.validated_data['end_date']))) != 0:
@@ -61,6 +62,14 @@ class ConsultantTimeAPI(APIView):
 
             consultant_time_serializer = ConsultantTimeSerializer(consultant_time, data=request.data)
             if consultant_time_serializer.is_valid():
+                if consultant_time.user is not None:
+                    # TODO send notification for user and confirm from his/her
+                    # TODO staging changes of time
+                    return Response({"message": "باید منتظر تایید کاربر رزروکننده بمانید",
+                                     "reservatore": {"username": consultant_time.user.username,
+                                                     "phone_number": consultant_time.user.phone_number}},
+                                    status=status.HTTP_202_ACCEPTED)
+                # TODO check similar consultant times
                 consultant_time_serializer.save()
                 return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
             else:
