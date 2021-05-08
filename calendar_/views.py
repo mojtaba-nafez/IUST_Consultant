@@ -77,3 +77,26 @@ class ConsultantTimeAPI(APIView):
                 return Response({"error": consultant_time_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, ConsultantTimeId):
+        try:
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related("consultant").select_related("user")
+            if len(consultant_time) == 0:
+                return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                consultant_time = consultant_time[0]
+
+            if consultant_time.consultant.id != request.user.id and len(
+                    ConsultantProfile.my_secretaries.through.objects.filter(
+                        consultantprofile_id=consultant_time.consultant.id,
+                        userprofile_id=request.user.id)) == 0:
+                return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+
+            #TODO get lock of consultant time - if user are reserving at now
+            if consultant_time.user is None:
+                consultant_time.delete()
+                return Response({}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
