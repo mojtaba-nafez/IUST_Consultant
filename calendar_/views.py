@@ -49,7 +49,8 @@ class ConsultantTimeAPI(APIView):
 
     def put(self, request, ConsultantTimeId, ):
         try:
-            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related("consultant")
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related(
+                "consultant").select_related('user')
             if len(consultant_time) == 0:
                 return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -80,7 +81,8 @@ class ConsultantTimeAPI(APIView):
 
     def delete(self, request, ConsultantTimeId):
         try:
-            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related("consultant").select_related("user")
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related(
+                "consultant").select_related("user")
             if len(consultant_time) == 0:
                 return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
             else:
@@ -92,11 +94,54 @@ class ConsultantTimeAPI(APIView):
                         userprofile_id=request.user.id)) == 0:
                 return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
 
-            #TODO get lock of consultant time - if user are reserving at now
+            # TODO get lock of consultant time - if user are reserving at now
             if consultant_time.user is None:
                 consultant_time.delete()
                 return Response({}, status=status.HTTP_200_OK)
             else:
-                return Response({"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."},
+                                status=status.HTTP_403_FORBIDDEN)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CancelConsultantTime(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, ConsultantTimeId, ):
+        try:
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related(
+                "consultant").select_related("user")
+            if len(consultant_time) == 0:
+                return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                consultant_time = consultant_time[0]
+
+            if consultant_time.user is None:
+                return Response({"error": "این ساعت هنوز رزرو نشده است"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if consultant_time.start_date.__sub__(timezone.now()).min < 60:
+                return Response({"error": "به زمان مشاوره کمتر از 60 دقیقه مانده است"},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            if consultant_time.user.id == request.user.id:
+                # TODO SEND NOTIFICATION FOR CONSULTANT
+                # TODO PUNISH USER
+                consultant_time.user = None
+                consultant_time.save()
+                return Response({}, status=status.HTTP_200_OK)
+
+            if consultant_time.consultant.id != request.user.id and len(
+                    ConsultantProfile.my_secretaries.through.objects.filter(
+                        consultantprofile_id=consultant_time.consultant.id,
+                        userprofile_id=request.user.id)) == 0:
+                return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                # TODO SEND NOTIFICATION FOR USER
+                # TODO PUNISH CONSULTANT
+                consultant_time.user = None
+                consultant_time.save()
+                return Response({}, status=status.HTTP_200_OK)
+
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
