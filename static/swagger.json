@@ -2064,6 +2064,89 @@
           }
         }
       }
+    },
+    "/calendar/consultant-time/{ConsultantTimeId}/": {
+      "put": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "update  consultant time",
+        "operationId": "updateConsultantTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantTimeId",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "consultant time fields",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "title",
+                "start_date",
+                "end_date"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
