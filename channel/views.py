@@ -75,7 +75,7 @@ class EditChannel(APIView):
             serializer = EditChannelSerializer(data=request.data)
             if serializer.is_valid():
                 user = request.user
-                ch=channel = Channel.objects.filter(id=channelId)
+                ch = Channel.objects.filter(id=channelId)
 
                 if ch[0].consultant.id != user.id and ( user not in UserProfile.objects.filter(consultantprofile=ch[0].consultant)):
                     return Response("You do not have permission to perform this action", status=status.HTTP_403_FORBIDDEN)

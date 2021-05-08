@@ -8,7 +8,7 @@ class ConsultantTime(models.Model):
 
     start_date = models.DateTimeField(auto_now=False, auto_now_add=False)
     end_date = models.DateTimeField(auto_now=False, auto_now_add=False)
-    title = models.CharField( max_length=200)
+    title = models.CharField( max_length=200, null=True, blank=True)
     description = models.CharField( max_length=50, null=True, blank=True)
     cost = models.FloatField(default=0)
     user_grade = models.IntegerField(validators=[MaxValueValidator(100), MinValueValidator(0)], null=True, blank=True)
