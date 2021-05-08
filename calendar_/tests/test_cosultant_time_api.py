@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 import datetime
 import pytz
+from django.utils import timezone as tz
 from rest_framework.utils import json
 
 from User.models import ConsultantProfile, UserProfile
@@ -213,3 +214,89 @@ class PrivateConsultantTimeTest(TestCase):
         response = self.client.delete(self.url + "2/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(len(ConsultantTime.objects.filter(id=2)), 1)
+
+
+class PrivateCancelConsultantTimeTest(TestCase):
+    def setUp(self):
+        self.url = '/calendar/consultant-time/cancel/'
+        self.client = APIClient()
+        self.consultant = ConsultantProfile.objects.create(username="consultant", user_type='Immigration',
+                                                           phone_number="09184576125", first_name="hossein",
+                                                           last_name="masoudi", email="test1@gmailcom",
+                                                           password="123456",
+                                                           certificate="111")
+        self.secretary = UserProfile.objects.create(username="secretary", email="reza@gmail.com", password="123456",
+                                                    phone_number="09176273745", first_name="reza", last_name="rezaee")
+
+        self.consultant.my_secretaries.add(self.secretary)
+        self.reservatore = UserProfile.objects.create(username="normal_user", email="hamid@gmail.com",
+                                                      password="123456",
+                                                      phone_number="09176273746", first_name="hamid",
+                                                      last_name="azarbad")
+        timezone = pytz.timezone('UTC')
+        self.un_reserved_consultant_time = ConsultantTime.objects.create(consultant=self.consultant, user=None,
+                                                                         title="title", description="description",
+                                                                         start_date=timezone.localize(
+                                                                             datetime.datetime(2026, 1, 1, 18,
+                                                                                               30)),
+                                                                         end_date=timezone.localize(
+                                                                             datetime.datetime(2026, 1, 1, 19,
+                                                                                               30)))
+        self.reserved_consultant_time = ConsultantTime.objects.create(consultant=self.consultant, user=self.reservatore,
+                                                                      title="title", description="description",
+                                                                      start_date=timezone.localize(
+                                                                          datetime.datetime(2027, 1, 1, 18,
+                                                                                            30)),
+                                                                      end_date=timezone.localize(
+                                                                          datetime.datetime(2027, 1, 1, 19,
+                                                                                            30)))
+        self.late_consultant_time = ConsultantTime.objects.create(consultant=self.consultant, user=self.reservatore,
+                                                                  title="title", description="description",
+                                                                  start_date=
+                                                                  tz.now().__add__(
+                                                                      datetime.timedelta(minutes=5)),
+                                                                  end_date=
+                                                                  tz.now().__add__(
+                                                                      datetime.timedelta(minutes=6)))
+
+    def test_un_authorize_client(self):
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_invalid_consultant_time_id(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "10/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه زمان مشاوره موجود نیست"})
+
+    def test_un_reserved_consultant_time(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "این ساعت هنوز رزرو نشده است"})
+
+    def test_late_cancel_consultant_time(self):
+        self.client.force_authenticate(self.secretary)
+        response = self.client.delete(self.url + "3/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "به زمان مشاوره کمتر از 60 دقیقه مانده است"})
+
+    def test_un_reservatore_consultant_cancel_consultant_time(self):
+        foreign_user = UserProfile.objects.create(username="foreign_user", email="mohsen@gmail.com",
+                                                  password="123456",
+                                                  phone_number="09176273747", first_name="mohsen",
+                                                  last_name="azarbad")
+        self.client.force_authenticate(foreign_user)
+        response = self.client.delete(self.url + "2/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این کار را ندارید"})
+
+    def test_consultant_cancel_successfully(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "2/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_reservatore_cancel_successfully(self):
+        self.client.force_authenticate(self.reservatore)
+        response = self.client.delete(self.url + "2/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

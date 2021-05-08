@@ -7,6 +7,7 @@ from rest_framework import status
 from User.models import UserProfile
 from .serializers import *
 from django.db.models import Q
+import datetime
 
 
 class ConsultantTimeAPI(APIView):
@@ -120,7 +121,7 @@ class CancelConsultantTime(APIView):
             if consultant_time.user is None:
                 return Response({"error": "این ساعت هنوز رزرو نشده است"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if consultant_time.start_date.__sub__(timezone.now()).min < 60:
+            if consultant_time.start_date.__sub__(timezone.now()) < datetime.timedelta(minutes=60):
                 return Response({"error": "به زمان مشاوره کمتر از 60 دقیقه مانده است"},
                                 status=status.HTTP_403_FORBIDDEN)
 
