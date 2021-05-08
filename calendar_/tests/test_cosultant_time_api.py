@@ -50,8 +50,8 @@ class PrivateConsultantTimeTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.put(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        # response = self.client.post(self.url)
-        # self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         # response = self.client.post(self.url)
         # self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -191,3 +191,25 @@ class PrivateConsultantTimeTest(TestCase):
         self.client.force_authenticate(self.secretary)
         response = self.client.put(self.url + "2/", payload)
         self.assertEqual(response.status_code, status.HTTP_202_ACCEPTED)
+
+    def test_invalid_consultant_time_id_delete_request(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "10/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_normal_user_delete_request(self):
+        self.client.force_authenticate(self.normal_user)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_un_reserved_consultant_time_delete_request(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(ConsultantTime.objects.filter(id=1)), 0)
+
+    def test_reserved_consultant_time_delete_request(self):
+        self.client.force_authenticate(self.secretary)
+        response = self.client.delete(self.url + "2/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(ConsultantTime.objects.filter(id=2)), 1)
