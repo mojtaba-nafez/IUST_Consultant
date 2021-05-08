@@ -295,8 +295,10 @@ class PrivateCancelConsultantTimeTest(TestCase):
         self.client.force_authenticate(self.consultant)
         response = self.client.delete(self.url + "2/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ConsultantTime.objects.filter(id=2)[0].user, None)
 
     def test_reservatore_cancel_successfully(self):
         self.client.force_authenticate(self.reservatore)
         response = self.client.delete(self.url + "2/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(ConsultantTime.objects.filter(id=2)[0].user, None)
