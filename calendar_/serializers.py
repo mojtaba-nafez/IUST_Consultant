@@ -3,6 +3,26 @@ from .models import *
 from django.utils import timezone
 
 
+class ConsultantTimeReservatore(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "username": value.username,
+            "phone_number": value.phone_number,
+            "avatar": value.avatar.url if value.avatar else None
+        }
+
+
+class ConsultantTimeConsultant(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "username": value.username,
+            "phone_number": value.phone_number,
+            "avatar": value.avatar.url if value.avatar else None
+        }
+
+
 class ConsultantTimeSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True, allow_null=False)
     consultant_id = serializers.IntegerField(required=False, allow_null=False, write_only=True)
@@ -19,6 +39,8 @@ class ConsultantTimeSerializer(serializers.Serializer):
                                         error_messages={
                                             "length": "توضیحات حداکثر 500 کاراکتر میتواند باشد",
                                         }, )
+    user = ConsultantTimeReservatore(allow_null=True, read_only=True, allow_empty=False)
+    consultant = ConsultantTimeConsultant(allow_null=True, allow_empty=True, read_only=True)
 
     def create(self, validated_data):
         return ConsultantTime.objects.create(**validated_data)
