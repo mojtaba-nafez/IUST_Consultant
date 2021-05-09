@@ -13,6 +13,13 @@ import datetime
 class ConsultantTimeAPI(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        try:
+            date = datetime.datetime.strptime(request.GET['date'], "%d-%m-%y")
+        except ValueError as date_format_error:
+            return Response({"error": "فرمت تاریخ درست نیست"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     def post(self, request):
         try:
             if request.data.__contains__('consultant_id'):
