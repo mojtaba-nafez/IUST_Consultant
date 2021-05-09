@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils.datastructures import MultiValueDictKeyError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import APIView
 from rest_framework.response import Response
@@ -15,15 +16,21 @@ class ConsultantTimeAPI(APIView):
 
     def get(self, request):
         try:
-            start_date = datetime.datetime.strptime(request.GET['date'], "%y-%m-%d")
+            start_date = datetime.datetime.strptime(request.GET['date'], "%Y-%m-%d")
             end_date = start_date.__add__(datetime.timedelta(days=1))
+            my_employer_consultant_ids = list(
+                ConsultantProfile.my_secretaries.through.objects.values_list("consultantprofile_id").filter(
+                    userprofile_id=request.user.id))
             consultant_times = ConsultantTime.objects.filter(
-                Q(consultant_id=request.user.id) | Q(user_id=request.user.id), Q(start_date__gte=start_date),
-                Q(end_date_lt=end_date))
+                Q(consultant_id__in=my_employer_consultant_ids + [request.user.id]) | Q(user_id=request.user.id),
+                Q(start_date__gte=start_date),
+                Q(end_date__lt=end_date))
 
             consultant_times_serializer = ConsultantTimeSerializer(consultant_times, many=True)
             return Response(consultant_times_serializer.data, status=status.HTTP_200_OK)
 
+        except MultiValueDictKeyError as parameter_error:
+            return Response({"error": "تاریخ را نفرستاده اید"}, status=status.HTTP_400_BAD_REQUEST)
         except ValueError as date_format_error:
             return Response({"error": "فرمت تاریخ درست نیست"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:

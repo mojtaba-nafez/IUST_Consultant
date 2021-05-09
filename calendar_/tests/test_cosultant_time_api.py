@@ -45,6 +45,20 @@ class PrivateConsultantTimeTest(TestCase):
                                                                       end_date=timezone.localize(
                                                                           datetime.datetime(2027, 1, 1, 19,
                                                                                             30)).__str__())
+        self.consultant2 = ConsultantProfile.objects.create(username="consultant2", user_type='Immigration',
+                                                           phone_number="09184576128", first_name="hossein",
+                                                           last_name="masoudi", email="test12@gmailcom",
+                                                           password="123456",
+                                                           certificate="111")
+        self.consultant2.my_secretaries.add(self.secretary)
+        self.reserved_consultant_time2 = ConsultantTime.objects.create(consultant=self.consultant2, user=None,
+                                                                      title="title", description="description",
+                                                                      start_date=timezone.localize(
+                                                                          datetime.datetime(2027, 1, 1, 18,
+                                                                                            30)).__str__(),
+                                                                      end_date=timezone.localize(
+                                                                          datetime.datetime(2027, 1, 1, 19,
+                                                                                            30)).__str__())
 
     def test_un_authorize_client(self):
         response = self.client.post(self.url)
@@ -53,8 +67,112 @@ class PrivateConsultantTimeTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.delete(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        # response = self.client.post(self.url)
-        # self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_consultant_times_without_date_query_param(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "تاریخ را نفرستاده اید"})
+
+    def test_get_consultant_times_wrong_date_format(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.get(self.url + "?date=545488")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "فرمت تاریخ درست نیست"})
+
+    def test_normal_user_get_consultant_times(self):
+        self.client.force_authenticate(self.normal_user)
+        response = self.client.get(self.url + "?date=2027-01-01")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content), [
+            {
+                "id": 2,
+                "start_date": "2027-01-01T18:30:00Z",
+                "end_date": '2027-01-01T19:30:00Z',
+                "title": "title",
+                "description": "description",
+                "user": {
+                    "id": 3,
+                    "username": "normal_user",
+                    "phone_number": "09176273746",
+                    "avatar": None
+                },
+                "consultant": {
+                    "id": 1,
+                    "username": "consultant",
+                    "phone_number": "09184576125",
+                    "avatar": None
+                },
+            }
+        ])
+
+    def test_consultant_get_consultant_times(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.get(self.url + "?date=2027-01-01")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content), [
+            {
+                "id": 2,
+                "start_date": "2027-01-01T18:30:00Z",
+                "end_date": '2027-01-01T19:30:00Z',
+                "title": "title",
+                "description": "description",
+                "user": {
+                    "id": 3,
+                    "username": "normal_user",
+                    "phone_number": "09176273746",
+                    "avatar": None
+                },
+                "consultant": {
+                    "id": 1,
+                    "username": "consultant",
+                    "phone_number": "09184576125",
+                    "avatar": None
+                },
+            }
+        ])
+
+    def test_secretary_get_consultant_times(self):
+        self.client.force_authenticate(self.secretary)
+        response = self.client.get(self.url + "?date=2027-01-01")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content), [
+            {
+                "id": 2,
+                "start_date": "2027-01-01T18:30:00Z",
+                "end_date": '2027-01-01T19:30:00Z',
+                "title": "title",
+                "description": "description",
+                "user": {
+                    "id": 3,
+                    "username": "normal_user",
+                    "phone_number": "09176273746",
+                    "avatar": None
+                },
+                "consultant": {
+                    "id": 1,
+                    "username": "consultant",
+                    "phone_number": "09184576125",
+                    "avatar": None
+                },
+            },
+            {
+                "id": 3,
+                "start_date": "2027-01-01T18:30:00Z",
+                "end_date": '2027-01-01T19:30:00Z',
+                "title": "title",
+                "description": "description",
+                "user": None,
+                "consultant": {
+                    "id": 4,
+                    "username": "consultant2",
+                    "phone_number": "09184576128",
+                    "avatar": None
+                },
+            }
+        ])
 
     def test_normal_user_post_request(self):
         self.client.force_authenticate(self.normal_user)
