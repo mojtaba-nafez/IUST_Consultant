@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-rom User.models import UserProfile
+from User.models import UserProfile
 from .serializers import *
 from django.db.models import Q
 import datetime

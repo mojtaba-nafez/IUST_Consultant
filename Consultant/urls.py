@@ -30,7 +30,7 @@ urlpatterns = [
     path('request/', include('request.urls')),
     path('channel/', include('channel.urls')),
     path('calendar/', include('calendar_.urls')),
-    path('swagger/', views.SwaggerUI.as_view(), name='swagger-ui')
+    path('swagger/', user_view.SwaggerUI.as_view(), name='swagger-ui'),
     path('swagger/', user_view.SwaggerUI.as_view(), name='swagger-ui'),
     path('calendar/', include('calendar_.urls')),
     path('fakeData/', consultant_view.InsertFakeData.as_view(), name='insert-fake-data'),
