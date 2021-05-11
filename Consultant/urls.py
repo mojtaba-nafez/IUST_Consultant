@@ -16,20 +16,25 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import url, include
 from django.urls import path
-from User import views
+from User import views as user_view
+from Consultant import views as consultant_view
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', include('User.user_urls')),
     path('consultant/', include('User.consultant_urls')),
-    path('profile/', views.UserProfileAPI.as_view(), name="user profile"),
-    path('profile/<str:username>/', views.AnotherUserProfileAPI.as_view(), name="another user profile"),
+    path('profile/', user_view.UserProfileAPI.as_view(), name="user profile"),
+    path('profile/<str:username>/', user_view.AnotherUserProfileAPI.as_view(), name="another user profile"),
     path('channel-message/<int:channelId>/', include('message.urls')),
     path('request/', include('request.urls')),
     path('channel/', include('channel.urls')),
     path('calendar/', include('calendar_.urls')),
     path('swagger/', views.SwaggerUI.as_view(), name='swagger-ui')
+    path('swagger/', user_view.SwaggerUI.as_view(), name='swagger-ui'),
+    path('calendar/', include('calendar_.urls')),
+    path('fakeData/', consultant_view.InsertFakeData.as_view(), name='insert-fake-data'),
+
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -75,7 +75,7 @@ class EditChannel(APIView):
             serializer = EditChannelSerializer(data=request.data)
             if serializer.is_valid():
                 user = request.user
-                ch = channel = Channel.objects.filter(id=channelId)
+                ch = Channel.objects.filter(id=channelId)
 
                 if ch[0].consultant.id != user.id and (
                         user not in UserProfile.objects.filter(consultantprofile=ch[0].consultant)):
@@ -162,6 +162,8 @@ class UserChannelsAPI(APIView):
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
 class UserRoleInChannelAPI(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -185,6 +187,7 @@ class UserRoleInChannelAPI(APIView):
                             status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class ChannelSubscriptionAPI(APIView):
@@ -221,6 +224,9 @@ class ChannelSubscriptionAPI(APIView):
                 return Response({"error": subscription_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 
 
 class ChannelSubscribers(APIView):
@@ -275,6 +281,8 @@ class ChannelSubscribers(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
 class ChannelAdmins(APIView):
     permission_classes = []
 
@@ -309,6 +317,13 @@ class ChannelAdmins(APIView):
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
 
 
 class SearchChannel(APIView):
@@ -378,3 +393,5 @@ class SuggestionChannel(APIView):
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

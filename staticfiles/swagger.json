@@ -32,6 +32,14 @@
       "description": "Everything about channel-message"
     },
     {
+      "name": "Filling-DB",
+      "description": "insert fake data to DB"
+    },
+    {
+      "name": "Reservation",
+      "description": "user's reserve time of consultant's"
+    },
+    {
       "name": "Calendar",
       "description": "Everything about calendar"
     }
@@ -629,6 +637,7 @@
                     }
                   }
                 }
+                
               }
             }
           },
@@ -639,6 +648,7 @@
       }
     },
     "/channel/": {
+      
       "post": {
         "tags": [
           "Channel"
@@ -743,6 +753,7 @@
         "produces": [
           "application/json"
         ],
+        
         "parameters": [
           {
             "in": "path",
@@ -776,6 +787,7 @@
             "description": "user avatar."
           }
         ],
+        
         "responses": {
           "200": {
             "description": "OK",
@@ -848,6 +860,7 @@
         }
       }
     },
+   
     "/channel-message/{channelId}/{messageId}/": {
       "put": {
         "tags": [
@@ -1978,6 +1991,205 @@
                 },
                 "request_type": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+     "/fakeData/": {
+            "get": {
+        "tags": [
+          "Filling-DB"
+        ],
+        "summary": "insert fake data to DB",
+        "operationId": "Insert-Data",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+     "/reserve/{ConsultantID}/": {
+          "post": {
+          "tags": [
+            "Reservation"
+          ],
+          "summary": "Reserving Time",
+          "operationId": "ReserveTime",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+
+          "parameters": [
+             {
+                  "in": "path",
+                  "name": "ConsultantID",
+                  "required": true,
+                  "type": "integer"
+            },
+            {
+              "in": "body",
+              "name": "body",
+              "description": "Reserve Time for consultant: => date format:     '2021-05-08 07:52:40'",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email_username"
+                ],
+                "properties": {
+                  "start_date": {
+                    "type": "string"
+                  },
+                  "end_date": {
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            },
+            "400": {
+              "description": "Invalid input value"
+            }
+          }
+        },
+        "get": {
+        "tags": [
+          "Reservation"
+        ],
+        "summary": "get all free time of consul",
+        "operationId": "",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+
+        "parameters": [
+        {
+          "in": "path",
+          "name": "ConsultantID",
+          "required": true,
+          "type": "integer"
+        },
+        {
+          "in": "query",
+          "name": "date",
+          "required": true,
+          "description": "date of requesd time :  2021-10-01",
+          "type": "string"
+        }],
+
+        "responses": {
+          "200": {
+            "description": "OK",
+              "schema": {
+              "type": "object",
+
+
+              "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+
+                     "obsolete_reserved_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        },
+
+                      }
+                  },
+
+                   "obsolete_empty_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                           "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        },
+
+                      }
+                  },
+
+                "empty_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                           "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        },
+
+                      }
+                  },
+                  "reserved_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                           "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        },
+
+                      }
+                    },
+                  },
                 }
               }
             }
