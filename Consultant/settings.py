@@ -103,7 +103,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'iust_consultant',
+            'NAME': 'consultant',
             'USER': 'Hamidreza',
             'PASSWORD': 'Hamidreza77',
             'HOST': 'localhost',
