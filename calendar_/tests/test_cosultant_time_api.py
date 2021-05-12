@@ -46,19 +46,19 @@ class PrivateConsultantTimeTest(TestCase):
                                                                           datetime.datetime(2027, 1, 1, 19,
                                                                                             30)).__str__())
         self.consultant2 = ConsultantProfile.objects.create(username="consultant2", user_type='Immigration',
-                                                           phone_number="09184576128", first_name="hossein",
-                                                           last_name="masoudi", email="test12@gmailcom",
-                                                           password="123456",
-                                                           certificate="111")
+                                                            phone_number="09184576128", first_name="hossein",
+                                                            last_name="masoudi", email="test12@gmailcom",
+                                                            password="123456",
+                                                            certificate="111")
         self.consultant2.my_secretaries.add(self.secretary)
-        self.reserved_consultant_time2 = ConsultantTime.objects.create(consultant=self.consultant2, user=None,
-                                                                      title="title", description="description",
-                                                                      start_date=timezone.localize(
-                                                                          datetime.datetime(2027, 1, 1, 18,
-                                                                                            30)).__str__(),
-                                                                      end_date=timezone.localize(
-                                                                          datetime.datetime(2027, 1, 1, 19,
-                                                                                            30)).__str__())
+        self.un_reserved_consultant_time2 = ConsultantTime.objects.create(consultant=self.consultant2, user=None,
+                                                                          title="title", description="description",
+                                                                          start_date=timezone.localize(
+                                                                              datetime.datetime(2027, 1, 1, 18,
+                                                                                                30)).__str__(),
+                                                                          end_date=timezone.localize(
+                                                                              datetime.datetime(2027, 1, 1, 19,
+                                                                                                30)).__str__())
 
     def test_un_authorize_client(self):
         response = self.client.post(self.url)
@@ -95,9 +95,11 @@ class PrivateConsultantTimeTest(TestCase):
                 "description": "description",
                 "user": {
                     "id": 3,
-                    "username": "normal_user",
-                    "phone_number": "09176273746",
-                    "avatar": None
+                    "username": self.normal_user.username,
+                    "first_name": self.normal_user.first_name,
+                    "last_name": self.normal_user.last_name,
+                    "phone_number": self.normal_user.phone_number,
+                    "avatar": self.normal_user.avatar,
                 },
                 "consultant": {
                     "id": 1,
@@ -121,9 +123,11 @@ class PrivateConsultantTimeTest(TestCase):
                 "description": "description",
                 "user": {
                     "id": 3,
-                    "username": "normal_user",
-                    "phone_number": "09176273746",
-                    "avatar": None
+                    "username": self.normal_user.username,
+                    "first_name": self.normal_user.first_name,
+                    "last_name": self.normal_user.last_name,
+                    "phone_number": self.normal_user.phone_number,
+                    "avatar": self.normal_user.avatar,
                 },
                 "consultant": {
                     "id": 1,
@@ -147,9 +151,11 @@ class PrivateConsultantTimeTest(TestCase):
                 "description": "description",
                 "user": {
                     "id": 3,
-                    "username": "normal_user",
-                    "phone_number": "09176273746",
-                    "avatar": None
+                    "username": self.normal_user.username,
+                    "first_name": self.normal_user.first_name,
+                    "last_name": self.normal_user.last_name,
+                    "phone_number": self.normal_user.phone_number,
+                    "avatar": self.normal_user.avatar,
                 },
                 "consultant": {
                     "id": 1,
@@ -243,7 +249,8 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(json.loads(response.content), {"error": {"start_date": ['زمان شروع، از زمان حال قدیمی تر است']}})
+        self.assertEqual(json.loads(response.content),
+                         {"error": {"start_date": ['زمان شروع، از زمان حال قدیمی تر است']}})
 
     def test_invalid_end_date_post_request(self):
         self.client.force_authenticate(self.consultant)
@@ -341,7 +348,9 @@ class PrivateConsultantTimeTest(TestCase):
         response = self.client.delete(self.url + "2/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(len(ConsultantTime.objects.filter(id=2)), 1)
-        self.assertEqual(json.loads(response.content), {"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."})
+        self.assertEqual(json.loads(response.content),
+                         {"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."})
+
 
 class PrivateCancelConsultantTimeTest(TestCase):
     def setUp(self):
