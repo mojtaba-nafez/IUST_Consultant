@@ -9,6 +9,8 @@ from User.models import UserProfile
 from .serializers import *
 from django.db.models import Q
 import datetime
+from django.db import transaction
+import time
 
 
 class ConsultantTimeAPI(APIView):
@@ -21,13 +23,13 @@ class ConsultantTimeAPI(APIView):
             my_employer_consultant_ids = list(
                 ConsultantProfile.my_secretaries.through.objects.values_list("consultantprofile_id").filter(
                     userprofile_id=request.user.id))
-            consultant_times = ConsultantTime.objects.filter(
+            consultant_times = ConsultantTime.objects.select_for_update().filter(
                 Q(consultant_id__in=my_employer_consultant_ids + [request.user.id]) | Q(user_id=request.user.id),
                 Q(start_date__gte=start_date),
                 Q(end_date__lt=end_date))
-
-            consultant_times_serializer = ConsultantTimeSerializer(consultant_times, many=True)
-            return Response(consultant_times_serializer.data, status=status.HTTP_200_OK)
+            with transaction.atomic():
+                consultant_times_serializer = ConsultantTimeSerializer(consultant_times, many=True)
+                return Response(consultant_times_serializer.data, status=status.HTTP_200_OK)
 
         except MultiValueDictKeyError as parameter_error:
             return Response({"error": "تاریخ را نفرستاده اید"}, status=status.HTTP_400_BAD_REQUEST)
@@ -73,33 +75,35 @@ class ConsultantTimeAPI(APIView):
 
     def put(self, request, ConsultantTimeId, ):
         try:
-            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related(
+            consultant_time = ConsultantTime.objects.select_for_update().filter(id=ConsultantTimeId).select_related(
                 "consultant").select_related('user')
-            if len(consultant_time) == 0:
-                return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                consultant_time = consultant_time[0]
+            with transaction.atomic():
+                time.sleep(15)
+                if len(consultant_time) == 0:
+                    return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    consultant_time = consultant_time[0]
 
-            if consultant_time.consultant.id != request.user.id and len(
-                    ConsultantProfile.my_secretaries.through.objects.filter(
-                        consultantprofile_id=consultant_time.consultant.id,
-                        userprofile_id=request.user.id)) == 0:
-                return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+                if consultant_time.consultant.id != request.user.id and len(
+                        ConsultantProfile.my_secretaries.through.objects.filter(
+                            consultantprofile_id=consultant_time.consultant.id,
+                            userprofile_id=request.user.id)) == 0:
+                    return Response({"error": "شما دسترسی به این کار را ندارید"}, status=status.HTTP_403_FORBIDDEN)
 
-            consultant_time_serializer = ConsultantTimeSerializer(consultant_time, data=request.data)
-            if consultant_time_serializer.is_valid():
-                if consultant_time.user is not None:
-                    # TODO send notification for user and confirm from his/her
-                    # TODO staging changes of time
-                    return Response({"message": "باید منتظر تایید کاربر رزروکننده بمانید",
-                                     "reservatore": {"username": consultant_time.user.username,
-                                                     "phone_number": consultant_time.user.phone_number}},
-                                    status=status.HTTP_202_ACCEPTED)
-                # TODO check similar consultant times
-                consultant_time_serializer.save()
-                return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": consultant_time_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+                consultant_time_serializer = ConsultantTimeSerializer(consultant_time, data=request.data)
+                if consultant_time_serializer.is_valid():
+                    if consultant_time.user is not None:
+                        # TODO send notification for user and confirm from his/her
+                        # TODO staging changes of time
+                        return Response({"message": "باید منتظر تایید کاربر رزروکننده بمانید",
+                                         "reservatore": {"username": consultant_time.user.username,
+                                                         "phone_number": consultant_time.user.phone_number}},
+                                        status=status.HTTP_202_ACCEPTED)
+                    # TODO check similar consultant times
+                    consultant_time_serializer.save()
+                    return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": consultant_time_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
