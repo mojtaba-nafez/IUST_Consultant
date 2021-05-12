@@ -34,13 +34,6 @@ class PrivateReservationTests(TestCase):
         res = self.client.get('/calendar/reserve/8/?date=2021/5/8')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(res.data , "Incorrect date format, should be YYYY-MM-DD")
-    def test_
-
-
-
-
-
-
 
     #####################################################################
     #####################################################################
