@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "title": "Pargar Swagger"
   },
-  "host": "consultantiust.herokuapp.com",
+  "host": "iust-se-consultant.herokuapp.com",
   "tags": [
     {
       "name": "User",
@@ -38,6 +38,10 @@
     {
       "name": "Reservation",
       "description": "user's reserve time of consultant's"
+    },
+    {
+      "name": "Calendar",
+      "description": "Everything about calendar"
     }
   ],
   "schemes": [
@@ -468,6 +472,65 @@
         }
       }
     },
+    "/profile/{username}/": {
+      "get": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "get another user profile",
+        "operationId": "getAnotherProfile",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "username": {
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "avatar": {
+                  "type": "string"
+                },
+                "certificate": {
+                  "type": "string"
+                },
+                "user_type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
     "/consultant/login/": {
       "post": {
         "tags": [
@@ -537,13 +600,13 @@
         "produces": [
           "application/json"
         ],
-         "parameters": [
+        "parameters": [
           {
             "in": "path",
             "name": "channelId",
             "required": true,
             "type": "integer"
-          },
+          }
         ],
         "responses": {
           "200": {
@@ -558,20 +621,20 @@
                   "type": "string"
                 },
                 "description": {
-                  "type" : "string"
+                  "type": "string"
                 },
-                "invite_link":{
-                  "type":"string"
+                "invite_link": {
+                  "type": "string"
                 },
-                "consultant":{
+                "consultant": {
                   "type": "object",
-                   "properties": {
-                      "username": {
-                        "type": "string"
-                      },
-                      "phone_number": {
-                        "type": "string"
-                      }
+                  "properties": {
+                    "username": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    }
                   }
                 }
                 
@@ -672,7 +735,7 @@
         }
       }
     },
-     "/channel/update-channel-inf/{channelId}/":{
+    "/channel/update-channel-inf/{channelId}/": {
       "put": {
         "tags": [
           "Channel"
@@ -733,7 +796,7 @@
               "properties": {
                 "status": {
                   "type": "string"
-                },
+                }
               }
             }
           },
@@ -1250,7 +1313,7 @@
                       "channelID": {
                         "type": "integer"
                       },
-                       "avatar": {
+                      "avatar": {
                         "type": "string"
                       }
                     }
@@ -1303,15 +1366,13 @@
                       "invite_link": {
                         "type": "string"
                       },
-                       "channelID": {
+                      "channelID": {
                         "type": "integer"
                       },
-                       "avatar": {
+                      "avatar": {
                         "type": "string"
                       }
-                    },
-                    
-                    
+                    }
                   }
                 }
               }
@@ -2038,7 +2099,7 @@
         "produces": [
           "application/json"
         ],
-        
+
         "parameters": [
         {
           "in": "path",
@@ -2053,19 +2114,19 @@
           "description": "date of requesd time :  2021-10-01",
           "type": "string"
         }],
-        
+
         "responses": {
           "200": {
             "description": "OK",
               "schema": {
               "type": "object",
-              
-              
+
+
               "properties": {
                 "data": {
                     "type": "object",
                     "properties": {
-                       
+
                      "obsolete_reserved_time": {
                       "type": "array",
                       "items": {
@@ -2078,10 +2139,10 @@
                             "type": "string"
                           }
                         },
-                        
+
                       }
                   },
-                  
+
                    "obsolete_empty_time": {
                       "type": "array",
                       "items": {
@@ -2094,10 +2155,10 @@
                             "type": "string"
                           }
                         },
-                        
+
                       }
                   },
-                  
+
                 "empty_time": {
                       "type": "array",
                       "items": {
@@ -2110,7 +2171,7 @@
                             "type": "string"
                           }
                         },
-                        
+
                       }
                   },
                   "reserved_time": {
@@ -2125,13 +2186,326 @@
                             "type": "string"
                           }
                         },
-                        
+
                       }
-                    },    
+                    },
                   },
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/calendar/consultant-time/": {
+      "get": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "get all consultant time",
+        "operationId": "getConsultantTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "date",
+            "type": "string",
+            "format": "date",
+            "default": "2021-01-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    },
+                    "avatar": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "consultant": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    },
+                    "avatar": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "create new consultant time",
+        "operationId": "createConsultantTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "consultant time fields",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "title",
+                "start_date",
+                "end_date"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "consultant_id": {
+                  "type": "integer"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/calendar/consultant-time/{ConsultantTimeId}/": {
+      "put": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "update  consultant time",
+        "operationId": "updateConsultantTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantTimeId",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "consultant time fields",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "title",
+                "start_date",
+                "end_date"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string",
+                  "maxLength": 500
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "delete  consultant time",
+        "operationId": "deleteConsultantTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantTimeId",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/calendar/consultant-time/cancel/{ConsultantTimeId}/": {
+      "delete": {
+        "tags": [
+          "Calendar"
+        ],
+        "summary": "cancel  consultant time",
+        "operationId": "cancelConsultantTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantTimeId",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

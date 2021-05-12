@@ -67,22 +67,24 @@ class ChannelAPI(APIView):
 
 
 class EditChannel(APIView):
-    #permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def put(self, request, channelId, format=None):
         try:
             print(request.data)
-            
+
             serializer = EditChannelSerializer(data=request.data)
             if serializer.is_valid():
                 user = request.user
                 ch = Channel.objects.filter(id=channelId)
 
-                if ch[0].consultant.id != user.id and ( user not in UserProfile.objects.filter(consultantprofile=ch[0].consultant)):
-                    return Response("You do not have permission to perform this action", status=status.HTTP_403_FORBIDDEN)
+                if ch[0].consultant.id != user.id and (
+                        user not in UserProfile.objects.filter(consultantprofile=ch[0].consultant)):
+                    return Response("You do not have permission to perform this action",
+                                    status=status.HTTP_403_FORBIDDEN)
 
                 name = serializer.data.get('name')
                 print(serializer.data)
-                if name!=None:
+                if name != None:
                     Channel.objects.filter(pk=channelId).update(name=name)
                 invite_link = serializer.data.get('invite_link')
                 if invite_link:
@@ -90,9 +92,9 @@ class EditChannel(APIView):
                         Channel.objects.filter(pk=channelId).update(invite_link=invite_link)
                     except:
                         pass
-                    
+
                 try:
-                    avatar =  request.FILES['avatar']
+                    avatar = request.FILES['avatar']
                     ch = Channel.objects.get(pk=channelId)
                     ch.avatar.delete(save=True)
                     ch.avatar = avatar
@@ -103,15 +105,14 @@ class EditChannel(APIView):
                 description = serializer.data.get('description')
                 if description:
                     Channel.objects.filter(pk=channelId).update(description=description)
-                
+
                 return Response({'status': 'OK'},
-                                    status=status.HTTP_200_OK)
+                                status=status.HTTP_200_OK)
 
 
         except:
             return Response({'status': "Internal Server Error, We'll Check It Later"},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                                
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserChannelsAPI(APIView):
@@ -130,7 +131,8 @@ class UserChannelsAPI(APIView):
                         "name": channel.name,
                         "description": channel.description,
                         "invite_link": channel.invite_link,
-                        "user_role": "consultant"
+                        "user_role": "consultant",
+                        'avatar': channel.avatar.url if channel.avatar else None,
                     }
                 ]
             for channel in user_is_secretary:
@@ -140,7 +142,8 @@ class UserChannelsAPI(APIView):
                         "name": channel.name,
                         "description": channel.description,
                         "invite_link": channel.invite_link,
-                        "user_role": "secretary"
+                        "user_role": "secretary",
+                        'avatar': channel.avatar.url if channel.avatar else None,
                     }
                 ]
             for channel in user_is_subscriber:
@@ -150,7 +153,8 @@ class UserChannelsAPI(APIView):
                         "name": channel.name,
                         "description": channel.description,
                         "invite_link": channel.invite_link,
-                        "user_role": "subscriber"
+                        "user_role": "subscriber",
+                        'avatar': channel.avatar.url if channel.avatar else None,
                     }
                 ]
             return Response(user_channels, status=status.HTTP_200_OK)
@@ -250,21 +254,23 @@ class ChannelSubscribers(APIView):
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
     def delete(self, request, channelId, format=None):
         try:
             query = request.GET['username']  # string
             # print("")
             serializer = DeleteSubscriberSerializer(data=request.data)
             if serializer.is_valid():
-                username = serializer.data.get('username')               
-                channels=list(Channel.objects.filter(pk=channelId))
-                if len(channels)==0:
+                username = serializer.data.get('username')
+                channels = list(Channel.objects.filter(pk=channelId))
+                if len(channels) == 0:
                     return Response("channel not exist!", status=status.HTTP_404_NOT_FOUND)
-                if channels[0].consultant.id != request.user.id and (request.user not in UserProfile.objects.filter(consultantprofile=channels[0].consultant)):
-                    return Response("You do not have permission to perform this action", status=status.HTTP_403_FORBIDDEN)
-                
-                value =Subscription.objects.filter(user__username=username, channel=channels[0]).delete()
+                if channels[0].consultant.id != request.user.id and (
+                        request.user not in UserProfile.objects.filter(consultantprofile=channels[0].consultant)):
+                    return Response("You do not have permission to perform this action",
+                                    status=status.HTTP_403_FORBIDDEN)
+
+                value = Subscription.objects.filter(user__username=username, channel=channels[0]).delete()
                 if value[0] == 0:
                     return Response("this user is not a subscriber of this channel!", status=status.HTTP_404_NOT_FOUND)
 
@@ -272,22 +278,23 @@ class ChannelSubscribers(APIView):
             return Response({'status': 'Bad Request.'}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'status': "Internal Server Error, We'll Check It Later"},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
 
 class ChannelAdmins(APIView):
     permission_classes = []
+
     def get(self, request, channelId, format=None):
         try:
-            if len(Channel.objects.filter(pk=channelId))==0:
+            if len(Channel.objects.filter(pk=channelId)) == 0:
                 return Response("channel not exist!", status=status.HTTP_404_NOT_FOUND)
-            channel =  list(Channel.objects.filter(pk=channelId))
-            if len(channel)==0:
+            channel = list(Channel.objects.filter(pk=channelId))
+            if len(channel) == 0:
                 return Response("User has not create channel before!", status=status.HTTP_404_NOT_FOUND)
             channel_ = channel[0]
-            
+
             admins = UserProfile.objects.filter(consultantprofile=channel_.consultant)
             data = []
             for i in range(len(admins)):
@@ -330,7 +337,7 @@ class SearchChannel(APIView):
             if request.GET.get('search_category') != None:
                 search_caregory = request.GET['search_category']
             data = []
-            if (request.GET.get('search_category') != None) or (search_caregory !=''):
+            if (request.GET.get('search_category') != None) or (search_caregory != ''):
                 #  ch = Channel.objects.filter(consultant==)
                 Channels = Channel.objects.filter(consultant__user_type=search_caregory).filter(
                     Q(name__icontains=query) | Q(description__icontains=query))
@@ -365,21 +372,22 @@ class SuggestionChannel(APIView):
 
     def get(self, request, format=None):
         try:
-            user_types = ['normal_user', 'Lawyer', 'medical', 'EntranceExam', 'Psychology', 'Immigration','AcademicAdvice']
+            user_types = ['normal_user', 'Lawyer', 'medical', 'EntranceExam', 'Psychology', 'Immigration',
+                          'AcademicAdvice']
             data = {}
             for user_type in user_types:
                 Channels = list(Channel.objects.filter(consultant__user_type=user_type))[0:15]
                 tmp = []
                 for channel in Channels:
                     tmp.append({
-                            'name': channel.name,
-                            'consultant_full_name': channel.consultant.first_name + " " + channel.consultant.last_name,
-                            'invite_link': channel.invite_link,
-                            'channelID': channel.pk,
-                            'avatar': channel.avatar.url if channel.avatar else None,
+                        'name': channel.name,
+                        'consultant_full_name': channel.consultant.first_name + " " + channel.consultant.last_name,
+                        'invite_link': channel.invite_link,
+                        'channelID': channel.pk,
+                        'avatar': channel.avatar.url if channel.avatar else None,
 
-                        })
-                data[user_type]=tmp
+                    })
+                data[user_type] = tmp
 
             return Response(data, status=status.HTTP_200_OK)
         except:
