@@ -637,7 +637,6 @@
                     }
                   }
                 }
-                
               }
             }
           },
@@ -648,7 +647,6 @@
       }
     },
     "/channel/": {
-      
       "post": {
         "tags": [
           "Channel"
@@ -753,7 +751,6 @@
         "produces": [
           "application/json"
         ],
-        
         "parameters": [
           {
             "in": "path",
@@ -787,7 +784,6 @@
             "description": "user avatar."
           }
         ],
-        
         "responses": {
           "200": {
             "description": "OK",
@@ -860,7 +856,6 @@
         }
       }
     },
-   
     "/channel-message/{channelId}/{messageId}/": {
       "put": {
         "tags": [
@@ -1998,8 +1993,8 @@
         }
       }
     },
-     "/fakeData/": {
-            "get": {
+    "/fakeData/": {
+      "get": {
         "tags": [
           "Filling-DB"
         ],
@@ -2028,64 +2023,63 @@
         }
       }
     },
-     "/calendar/reserve/{ConsultantID}/": {
-          "post": {
-          "tags": [
-            "Reservation"
-          ],
-          "summary": "Reserving Time",
-          "operationId": "ReserveTime",
-          "consumes": [
-            "application/json"
-          ],
-          "produces": [
-            "application/json"
-          ],
-
-          "parameters": [
-             {
-                  "in": "path",
-                  "name": "ConsultantID",
-                  "required": true,
-                  "type": "integer"
-            },
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Reserve Time for consultant: => date format:     '2021-05-08 07:52:40'",
-              "required": true,
-              "schema": {
-                "type": "object",
-                "required": [
-                  "email_username"
-                ],
-                "properties": {
-                  "start_date": {
-                    "type": "string"
-                  },
-                  "end_date": {
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "type": "string"
-                  }
+    "/calendar/reserve/{ConsultantID}/": {
+      "post": {
+        "tags": [
+          "Reservation"
+        ],
+        "summary": "Reserving Time",
+        "operationId": "ReserveTime",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantID",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Reserve Time for consultant: => date format:     '2021-05-08 07:52:40'",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "email_username"
+              ],
+              "properties": {
+                "start_date": {
+                  "type": "string"
+                },
+                "end_date": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
                 }
               }
             }
-          ],
-          "responses": {
-            "200": {
-              "description": "OK"
-            },
-            "400": {
-              "description": "Invalid input value"
-            }
           }
-        },
-        "get": {
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid input value"
+          }
+        }
+      },
+      "get": {
         "tags": [
           "Reservation"
         ],
@@ -2099,35 +2093,31 @@
         "produces": [
           "application/json"
         ],
-
         "parameters": [
-        {
-          "in": "path",
-          "name": "ConsultantID",
-          "required": true,
-          "type": "integer"
-        },
-        {
-          "in": "query",
-          "name": "date",
-          "required": true,
-          "description": "date of requesd time :  2021-10-01",
-          "type": "string"
-        }],
-
+          {
+            "in": "path",
+            "name": "ConsultantID",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "description": "date of requesd time :  2021-10-01",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
-              "schema": {
+            "schema": {
               "type": "object",
-
-
               "properties": {
                 "data": {
-                    "type": "object",
-                    "properties": {
-
-                     "obsolete_reserved_time": {
+                  "type": "object",
+                  "properties": {
+                    "obsolete_reserved_time": {
                       "type": "array",
                       "items": {
                         "type": "object",
@@ -2138,58 +2128,52 @@
                           "end_time": {
                             "type": "string"
                           }
-                        },
-
-                      }
-                  },
-
-                   "obsolete_empty_time": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                           "start_time": {
-                            "type": "string"
-                          },
-                          "end_time": {
-                            "type": "string"
-                          }
-                        },
-
-                      }
-                  },
-
-                "empty_time": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                           "start_time": {
-                            "type": "string"
-                          },
-                          "end_time": {
-                            "type": "string"
-                          }
-                        },
-
-                      }
-                  },
-                  "reserved_time": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                           "start_time": {
-                            "type": "string"
-                          },
-                          "end_time": {
-                            "type": "string"
-                          }
-                        },
-
+                        }
                       }
                     },
-                  },
+                    "obsolete_empty_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "empty_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "reserved_time": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "start_time": {
+                            "type": "string"
+                          },
+                          "end_time": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -2310,15 +2294,10 @@
             "schema": {
               "type": "object",
               "required": [
-                "title",
                 "start_date",
                 "end_date"
               ],
               "properties": {
-                "title": {
-                  "type": "string",
-                  "maxLength": 200
-                },
                 "start_date": {
                   "type": "string"
                 },
@@ -2327,10 +2306,6 @@
                 },
                 "consultant_id": {
                   "type": "integer"
-                },
-                "description": {
-                  "type": "string",
-                  "maxLength": 500
                 }
               }
             }
@@ -2396,24 +2371,15 @@
             "schema": {
               "type": "object",
               "required": [
-                "title",
                 "start_date",
                 "end_date"
               ],
               "properties": {
-                "title": {
-                  "type": "string",
-                  "maxLength": 200
-                },
                 "start_date": {
                   "type": "string"
                 },
                 "end_date": {
                   "type": "string"
-                },
-                "description": {
-                  "type": "string",
-                  "maxLength": 500
                 }
               }
             }

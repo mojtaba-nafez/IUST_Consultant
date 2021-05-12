@@ -46,19 +46,19 @@ class PrivateConsultantTimeTest(TestCase):
                                                                           datetime.datetime(2027, 1, 1, 19,
                                                                                             30)).__str__())
         self.consultant2 = ConsultantProfile.objects.create(username="consultant2", user_type='Immigration',
-                                                           phone_number="09184576128", first_name="hossein",
-                                                           last_name="masoudi", email="test12@gmailcom",
-                                                           password="123456",
-                                                           certificate="111")
+                                                            phone_number="09184576128", first_name="hossein",
+                                                            last_name="masoudi", email="test12@gmailcom",
+                                                            password="123456",
+                                                            certificate="111")
         self.consultant2.my_secretaries.add(self.secretary)
-        self.reserved_consultant_time2 = ConsultantTime.objects.create(consultant=self.consultant2, user=None,
-                                                                      title="title", description="description",
-                                                                      start_date=timezone.localize(
-                                                                          datetime.datetime(2027, 1, 1, 18,
-                                                                                            30)).__str__(),
-                                                                      end_date=timezone.localize(
-                                                                          datetime.datetime(2027, 1, 1, 19,
-                                                                                            30)).__str__())
+        self.un_reserved_consultant_time2 = ConsultantTime.objects.create(consultant=self.consultant2, user=None,
+                                                                          title="title", description="description",
+                                                                          start_date=timezone.localize(
+                                                                              datetime.datetime(2027, 1, 1, 18,
+                                                                                                30)).__str__(),
+                                                                          end_date=timezone.localize(
+                                                                              datetime.datetime(2027, 1, 1, 19,
+                                                                                                30)).__str__())
 
     def test_un_authorize_client(self):
         response = self.client.post(self.url)
@@ -95,9 +95,11 @@ class PrivateConsultantTimeTest(TestCase):
                 "description": "description",
                 "user": {
                     "id": 3,
-                    "username": "normal_user",
-                    "phone_number": "09176273746",
-                    "avatar": None
+                    "username": self.normal_user.username,
+                    "first_name": self.normal_user.first_name,
+                    "last_name": self.normal_user.last_name,
+                    "phone_number": self.normal_user.phone_number,
+                    "avatar": self.normal_user.avatar,
                 },
                 "consultant": {
                     "id": 1,
@@ -121,9 +123,11 @@ class PrivateConsultantTimeTest(TestCase):
                 "description": "description",
                 "user": {
                     "id": 3,
-                    "username": "normal_user",
-                    "phone_number": "09176273746",
-                    "avatar": None
+                    "username": self.normal_user.username,
+                    "first_name": self.normal_user.first_name,
+                    "last_name": self.normal_user.last_name,
+                    "phone_number": self.normal_user.phone_number,
+                    "avatar": self.normal_user.avatar,
                 },
                 "consultant": {
                     "id": 1,
@@ -147,9 +151,11 @@ class PrivateConsultantTimeTest(TestCase):
                 "description": "description",
                 "user": {
                     "id": 3,
-                    "username": "normal_user",
-                    "phone_number": "09176273746",
-                    "avatar": None
+                    "username": self.normal_user.username,
+                    "first_name": self.normal_user.first_name,
+                    "last_name": self.normal_user.last_name,
+                    "phone_number": self.normal_user.phone_number,
+                    "avatar": self.normal_user.avatar,
                 },
                 "consultant": {
                     "id": 1,
@@ -184,6 +190,7 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما منشی این مشاور نیستید"})
 
     def test_secretary_post_request_successfully(self):
         timezone = pytz.timezone('UTC')
@@ -191,8 +198,6 @@ class PrivateConsultantTimeTest(TestCase):
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 1,
-            "title": "consultant_time",
-            "description": "consultant_time",
             "consultant_id": 1,
             "start_date": start_date,
             'end_date': end_date
@@ -210,6 +215,7 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "مشاوری با این شناسه موجود نیست"})
 
     def test_consultant_post_request_successfully(self):
         timezone = pytz.timezone('UTC')
@@ -217,8 +223,6 @@ class PrivateConsultantTimeTest(TestCase):
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 1,
-            "title": "consultant_time",
-            "description": "consultant_time",
             "start_date": start_date,
             'end_date': end_date
         }
@@ -234,13 +238,13 @@ class PrivateConsultantTimeTest(TestCase):
         start_date = timezone.localize(datetime.datetime(2002, 1, 1, 18, 30)).__str__()
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 19, 30)).__str__()
         payload = {
-            "title": "consultant_time",
-            "description": "consultant_time",
             "start_date": start_date,
             'end_date': end_date
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {"error": {"start_date": ['زمان شروع، از زمان حال قدیمی تر است']}})
 
     def test_invalid_end_date_post_request(self):
         self.client.force_authenticate(self.consultant)
@@ -248,23 +252,25 @@ class PrivateConsultantTimeTest(TestCase):
         start_date = timezone.localize(datetime.datetime(2022, 1, 1, 18, 30)).__str__()
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 18, 30)).__str__()
         payload = {
-            "title": "consultant_time",
-            "description": "consultant_time",
             "start_date": start_date,
             'end_date': end_date
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {'error': {'non_field_errors': ['زمان پایان از زمان شروع قدیمی تر است']}})
 
     def test_normal_user_put_request(self):
         self.client.force_authenticate(self.normal_user)
         response = self.client.put(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این کار را ندارید"})
 
     def test_invalid_consultant_time_id_put_request(self):
         self.client.force_authenticate(self.consultant)
         response = self.client.put(self.url + "4/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه زمان مشاوره موجود نیست"})
 
     def test_put_request_un_reserved_consultant_time_successfully(self):
         timezone = pytz.timezone('UTC')
@@ -272,8 +278,6 @@ class PrivateConsultantTimeTest(TestCase):
         update_end_date = timezone.localize(datetime.datetime(2023, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 1,
-            "title": "update_title",
-            "description": "update_description",
             "start_date": update_start_date,
             "end_date": update_end_date,
         }
@@ -283,8 +287,6 @@ class PrivateConsultantTimeTest(TestCase):
         update_consultant_time = ConsultantTime.objects.filter(id=1)[0]
         self.assertEqual({
             "id": update_consultant_time.id,
-            "title": update_consultant_time.title,
-            "description": update_consultant_time.description,
             "start_date": update_consultant_time.start_date.__str__(),
             "end_date": update_consultant_time.end_date.__str__(),
         }, payload)
@@ -298,8 +300,6 @@ class PrivateConsultantTimeTest(TestCase):
         update_end_date = timezone.localize(datetime.datetime(2024, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 2,
-            "title": "update_title",
-            "description": "update_description",
             "start_date": update_start_date,
             "end_date": update_end_date,
         }
@@ -315,11 +315,13 @@ class PrivateConsultantTimeTest(TestCase):
         self.client.force_authenticate(self.consultant)
         response = self.client.delete(self.url + "10/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه زمان مشاوره موجود نیست"})
 
     def test_normal_user_delete_request(self):
         self.client.force_authenticate(self.normal_user)
         response = self.client.delete(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این کار را ندارید"})
 
     def test_un_reserved_consultant_time_delete_request(self):
         self.client.force_authenticate(self.consultant)
@@ -332,6 +334,8 @@ class PrivateConsultantTimeTest(TestCase):
         response = self.client.delete(self.url + "2/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(len(ConsultantTime.objects.filter(id=2)), 1)
+        self.assertEqual(json.loads(response.content),
+                         {"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."})
 
 
 class PrivateCancelConsultantTimeTest(TestCase):
