@@ -1967,7 +1967,7 @@
         }
       }
     },
-     "/reserve/{ConsultantID}/": {
+     "/calendar/reserve/{ConsultantID}/": {
           "post": {
           "tags": [
             "Reservation"
