@@ -67,7 +67,7 @@ class Reserve(APIView):
 
             empty_time = consultant_time.exclude(start_date__lt=current_time).filter(user=None)
             filled_time = consultant_time.exclude(start_date__lt=current_time, user=None)
-            print("herrrreeee")
+
             data = {
                 "obsolete_reserved_time":[],
                 "obsolete_empty_time":[],
@@ -101,7 +101,7 @@ class Reserve(APIView):
                         "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
                 })
 
-            print(data)
+
 
             return Response({"data":data}, status=status.HTTP_200_OK)
         except Exception as server_error:
