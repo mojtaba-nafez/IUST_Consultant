@@ -19,7 +19,7 @@ class Reserve(APIView):
     #  all date are in tzinfo=<UTC>
     def post(self, request, ConsultantID, format=None):
         try:
-            serializer = ConsultantTimeSerializer(data=request.data)
+            serializer = ReserveConsultantTimeSerializer(data=request.data)
             if serializer.is_valid():
                 consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID)
 

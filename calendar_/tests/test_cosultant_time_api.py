@@ -198,8 +198,6 @@ class PrivateConsultantTimeTest(TestCase):
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 1,
-            "title": "consultant_time",
-            "description": "consultant_time",
             "consultant_id": 1,
             "start_date": start_date,
             'end_date': end_date
@@ -225,8 +223,6 @@ class PrivateConsultantTimeTest(TestCase):
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 1,
-            "title": "consultant_time",
-            "description": "consultant_time",
             "start_date": start_date,
             'end_date': end_date
         }
@@ -242,8 +238,6 @@ class PrivateConsultantTimeTest(TestCase):
         start_date = timezone.localize(datetime.datetime(2002, 1, 1, 18, 30)).__str__()
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 19, 30)).__str__()
         payload = {
-            "title": "consultant_time",
-            "description": "consultant_time",
             "start_date": start_date,
             'end_date': end_date
         }
@@ -258,8 +252,6 @@ class PrivateConsultantTimeTest(TestCase):
         start_date = timezone.localize(datetime.datetime(2022, 1, 1, 18, 30)).__str__()
         end_date = timezone.localize(datetime.datetime(2022, 1, 1, 18, 30)).__str__()
         payload = {
-            "title": "consultant_time",
-            "description": "consultant_time",
             "start_date": start_date,
             'end_date': end_date
         }
@@ -286,8 +278,6 @@ class PrivateConsultantTimeTest(TestCase):
         update_end_date = timezone.localize(datetime.datetime(2023, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 1,
-            "title": "update_title",
-            "description": "update_description",
             "start_date": update_start_date,
             "end_date": update_end_date,
         }
@@ -297,8 +287,6 @@ class PrivateConsultantTimeTest(TestCase):
         update_consultant_time = ConsultantTime.objects.filter(id=1)[0]
         self.assertEqual({
             "id": update_consultant_time.id,
-            "title": update_consultant_time.title,
-            "description": update_consultant_time.description,
             "start_date": update_consultant_time.start_date.__str__(),
             "end_date": update_consultant_time.end_date.__str__(),
         }, payload)
@@ -312,8 +300,6 @@ class PrivateConsultantTimeTest(TestCase):
         update_end_date = timezone.localize(datetime.datetime(2024, 1, 1, 19, 30)).__str__()
         payload = {
             "id": 2,
-            "title": "update_title",
-            "description": "update_description",
             "start_date": update_start_date,
             "end_date": update_end_date,
         }
