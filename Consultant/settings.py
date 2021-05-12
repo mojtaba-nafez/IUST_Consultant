@@ -99,24 +99,24 @@ if 'DATABASE_URL' in os.environ:
 	        'PASSWORD': '5b05f9b7010cc6e3d570a878f3038384e0eafe04afe0270ffd934941885dd16a'
      	}
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'consultant',
-            'USER': 'Hamidreza',
-            'PASSWORD': 'Hamidreza77',
-            'HOST': 'localhost',
-            'PORT': '3306',
-        }
-    }
 # else:
 #     DATABASES = {
 #         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#             'ENGINE': 'django.db.backends.mysql',
+#             'NAME': 'consultant',
+#             'USER': 'Hamidreza',
+#             'PASSWORD': 'Hamidreza77',
+#             'HOST': 'localhost',
+#             'PORT': '3306',
 #         }
 #     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 

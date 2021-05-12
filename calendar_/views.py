@@ -82,7 +82,6 @@ class ConsultantTimeAPI(APIView):
                     return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     consultant_time = consultant_time[0]
-                time.sleep(15)
                 if consultant_time.consultant.id != request.user.id and len(
                         ConsultantProfile.my_secretaries.through.objects.filter(
                             consultantprofile_id=consultant_time.consultant.id,

@@ -184,6 +184,7 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما منشی این مشاور نیستید"})
 
     def test_secretary_post_request_successfully(self):
         timezone = pytz.timezone('UTC')
@@ -210,6 +211,7 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "مشاوری با این شناسه موجود نیست"})
 
     def test_consultant_post_request_successfully(self):
         timezone = pytz.timezone('UTC')
@@ -241,6 +243,7 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": {"start_date": ['زمان شروع، از زمان حال قدیمی تر است']}})
 
     def test_invalid_end_date_post_request(self):
         self.client.force_authenticate(self.consultant)
@@ -255,16 +258,20 @@ class PrivateConsultantTimeTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {'error': {'non_field_errors': ['زمان پایان از زمان شروع قدیمی تر است']}})
 
     def test_normal_user_put_request(self):
         self.client.force_authenticate(self.normal_user)
         response = self.client.put(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این کار را ندارید"})
 
     def test_invalid_consultant_time_id_put_request(self):
         self.client.force_authenticate(self.consultant)
         response = self.client.put(self.url + "4/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه زمان مشاوره موجود نیست"})
 
     def test_put_request_un_reserved_consultant_time_successfully(self):
         timezone = pytz.timezone('UTC')
@@ -315,11 +322,13 @@ class PrivateConsultantTimeTest(TestCase):
         self.client.force_authenticate(self.consultant)
         response = self.client.delete(self.url + "10/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه زمان مشاوره موجود نیست"})
 
     def test_normal_user_delete_request(self):
         self.client.force_authenticate(self.normal_user)
         response = self.client.delete(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این کار را ندارید"})
 
     def test_un_reserved_consultant_time_delete_request(self):
         self.client.force_authenticate(self.consultant)
@@ -332,7 +341,7 @@ class PrivateConsultantTimeTest(TestCase):
         response = self.client.delete(self.url + "2/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(len(ConsultantTime.objects.filter(id=2)), 1)
-
+        self.assertEqual(json.loads(response.content), {"error": "این ساعت را کاربری رزرو کرده است. در صورت نیاز باید آن را لغو کنید."})
 
 class PrivateCancelConsultantTimeTest(TestCase):
     def setUp(self):
