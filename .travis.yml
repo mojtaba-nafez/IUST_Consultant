@@ -1,0 +1,30 @@
+language: python
+python:
+  - "3.8"
+
+services:
+  - docker
+
+before_script: pip install docker-compose
+
+script:
+  - docker-compose run app sh -c "python manage.py test"
+  
+
+
+anguage: python
+python:
+    - 3.6
+services:
+    - docker
+#    - postgresql
+install:
+    - pip install -r requirements.txt
+script:
+    - docker-compose up
+deploy:
+    provider: script
+    script: bash docker_push.sh
+    skip_cleanup: true
+    on:
+        branch: Deployment

@@ -99,6 +99,17 @@ if 'DATABASE_URL' in os.environ:
 	        'PASSWORD': '5b05f9b7010cc6e3d570a878f3038384e0eafe04afe0270ffd934941885dd16a'
      	}
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'consultant_postgresql',
+            'PORT': 5432,
+        }
+    }
 # else:
 #     DATABASES = {
 #         'default': {
@@ -110,13 +121,14 @@ if 'DATABASE_URL' in os.environ:
 #             'PORT': '3306',
 #         }
 #     }
-else:
+    '''
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
+    '''
 
 
 
