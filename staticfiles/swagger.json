@@ -2030,6 +2030,11 @@
         ],
         "summary": "Reserving Time",
         "operationId": "ReserveTime",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
         "consumes": [
           "application/json"
         ],
@@ -2084,7 +2089,7 @@
           "Reservation"
         ],
         "summary": "get all free time of consul",
-        "operationId": "",
+        "operationId": "Get-Reservation-Time",
         "security": [
           {
             "Token": []
