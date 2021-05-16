@@ -204,7 +204,7 @@ class ConsultantTimeAPI(APIView):
 
     def delete(self, request, ConsultantTimeId):
         try:
-            consultant_time = ConsultantTime.objects.select_for_update().filter(id=ConsultantTimeId).select_related(
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related(
                 "consultant").select_related("user")
             with transaction.atomic():
                 if len(consultant_time) == 0:
