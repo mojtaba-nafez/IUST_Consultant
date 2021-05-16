@@ -73,14 +73,15 @@ class PrivateUserProfileTest(TestCase):
         payload = {
             'id': 2,
             'username': self.user.username,
-            'avatar': self.user.avatar.file if self.user.avatar else None,
+            # 'avatar': self.user.avatar.file if self.user.avatar else None,
             'email': self.user.email,
             'first_name': self.user.first_name,
             'last_name': self.user.last_name,
             'password': self.user.password,
             'phone_number': "09123988601",
         }
-        response = self.client.put(self.url, payload)
+        response = self.client.put(self.url, payload,)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(payload, json.loads(response.content))
 

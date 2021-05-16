@@ -15,7 +15,8 @@ class ChannelMessageSerializer(serializers.Serializer):
     id = serializers.IntegerField(allow_null=False, read_only=True)
     channel_id = serializers.IntegerField(allow_null=False, read_only=True)
     creator = ChannelMessageCreatorField(allow_null=False, allow_empty=False, read_only=True)
-    text = serializers.CharField(max_length=2000, required=False, allow_null=False, allow_blank=False)
+    text = serializers.CharField(max_length=2000, required=False, allow_null=False, allow_blank=False,
+                                 error_messages={'length': "طول متن حداکثر ۲۰۰ کاراکتر میتواند باشد"})
     message_choice = [
         ('t', 'text'),
         ('i', 'image'),
