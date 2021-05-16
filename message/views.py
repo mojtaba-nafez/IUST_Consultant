@@ -22,7 +22,7 @@ class ChannelMessageAPI(APIView, ChannelMessagePagination):
         try:
             channel = Channel.objects.filter(id=channelId)
             if len(channel) == 0:
-                return Response({"error": "channel_id is not exists"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "شناسه کانال موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
             messages = ChannelMessage.objects.filter(channel_id=channel[0].id).order_by('-date')
             page = self.paginate_queryset(messages, request, view=self)
             if page is not None:
@@ -42,12 +42,12 @@ class ChannelMessageAPI(APIView, ChannelMessagePagination):
                 channel = Channel.objects.filter(id=channelId).select_related(
                     'consultant')
                 if len(channel) == 0:
-                    return Response({"error": "channel_id is not exists"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "شناسه کانال موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 message_creator = request.user
                 if channel[0].consultant.baseuser_ptr_id != request.user.id and len(
                         ConsultantProfile.my_secretaries.through.objects.filter(
                             consultantprofile_id=channel[0].consultant.id, userprofile_id=request.user.id)) == 0:
-                    return Response({"error": "You dont have permission for this request"},
+                    return Response({"error": "شما مجوز انجام این کار را ندارید"},
                                     status=status.HTTP_403_FORBIDDEN)
                 message_serializer.validated_data['creator'] = message_creator
                 message_serializer.validated_data['channel'] = channel[0]
