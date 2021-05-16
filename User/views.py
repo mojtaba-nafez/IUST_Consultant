@@ -149,7 +149,7 @@ class AnotherUserProfileAPI(APIView):
             else:
                 user = UserProfile.objects.filter(username=username)
                 if len(user) == 0:
-                    return Response({"error": "This username not found"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "کاربری با این نام‌کاربری موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     user_serializer = UserProfileSerializer(user[0])
             user_profile = user_serializer.data

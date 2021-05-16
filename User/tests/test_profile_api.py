@@ -83,3 +83,20 @@ class PrivateUserProfileTest(TestCase):
         response = self.client.put(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(payload, json.loads(response.content))
+
+    def test_get_another_profile_invalid_username(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url + "consultant1/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual({'error': "کاربری با این نام‌کاربری موجود نیست"},
+                         json.loads(response.content))
+
+    def test_get_another_profile(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.get(self.url + "consultant/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual({'id': 1, 'username': self.consultant.username, 'avatar': None,
+                          'first_name': self.consultant.first_name, 'last_name': self.consultant.last_name,
+                          'private_profile': False, 'user_type': 'Immigration',
+                          'certificate': 'https://res.cloudinary.com/iust/image/upload/File%28certificate%29'},
+                         json.loads(response.content))
