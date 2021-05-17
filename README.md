@@ -10,7 +10,16 @@ admin.iust.ac.ir
 admin12345
 
 
-python manage.py makemigrations User calendar_ channel chat_room message 
+python manage.py makemigrations User calendar_ channel chat_room message request
+
+
+
+docker-compose run --rm consultant sh -c "python manage.py test"
+docker-compose run --rm consultant sh -c "python manage.py makemigrations User calendar_ channel chat_room message request"
+docker-compose run --rm consultant sh -c "python manage.py migrate"
+
+
+
 
 docker stop consultant_postgresql && docker rm consultant_postgresql && docker stop consultant && docker rm consultant
 

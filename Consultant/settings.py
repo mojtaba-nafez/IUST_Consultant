@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'Consultant.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-
+import sys
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
 	    'default': {
@@ -99,6 +99,13 @@ if 'DATABASE_URL' in os.environ:
 	        'PASSWORD': '5b05f9b7010cc6e3d570a878f3038384e0eafe04afe0270ffd934941885dd16a'
      	}
     }
+elif 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 else:
     DATABASES = {
         'default': {
@@ -108,7 +115,7 @@ else:
             'PASSWORD': 'postgres',
             'HOST': 'consultant_postgresql',
             'PORT': 5432,
-        }
+        },
     }
 # else:
 #     DATABASES = {

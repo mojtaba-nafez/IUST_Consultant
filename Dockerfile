@@ -15,5 +15,3 @@ RUN pip install -r requirements.txt
 
 # Collect static files
 RUN python manage.py collectstatic --no-input
-
-CMD ["gunicorn", "--chdir", "Consultant", "--bind", ":8000", "Consultant.wsgi:application"]

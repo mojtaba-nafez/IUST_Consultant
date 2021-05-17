@@ -23,8 +23,8 @@ class PrivateChannelMessageApiTest(TestCase):
         # self.audio_file = None
         # self.video_file = None
         base_address = os.path.dirname(__file__)
-        self.message_files_address = [None, base_address + "\\files\\test.png", base_address + "\\files\\test.mp3",
-                                      base_address + "\\files\\test.mp4"]
+        self.message_files_address = [None, base_address + "/files/test.png", base_address + "/files/test.mp3",
+                                      base_address + "/files/test.mp4"]
         self.channel_messages = []
         for i in range(20):
             message_file = None
