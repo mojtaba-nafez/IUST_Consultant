@@ -64,20 +64,19 @@ class Reserve(APIView):
             consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID, start_date__gte=start_day,
                                                             start_date__lte=end_day)
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "+00:00"
-
-            obsolete_filled_time = consultant_time.exclude(user=None, end_date__gt=current_time)
-            obsolete_empty_time = consultant_time.exclude(end_date__gt=current_time).filter(user=None)
+            
+            obsolete_filled_time = consultant_time.exclude(start_date__gt=current_time).exclude(user=None)
+            obsolete_empty_time = consultant_time.exclude(start_date__gt=current_time).filter(user=None)
 
             empty_time = consultant_time.exclude(start_date__lt=current_time).filter(user=None)
-            filled_time = consultant_time.exclude(start_date__lt=current_time, user=None)
-            print("herrrreeee")
+            filled_time = consultant_time.exclude(start_date__lt=current_time).exclude(user=None)
+
             data = {
                 "obsolete_reserved_time": [],
                 "obsolete_empty_time": [],
                 "empty_time": [],
                 "reserved_time": [],
             }
-
             for i in range(len(obsolete_filled_time)):
                 obj = obsolete_filled_time[i]
                 data["obsolete_reserved_time"].append({
@@ -102,9 +101,6 @@ class Reserve(APIView):
                     "start_time": datetime.time(obj.start_date.hour, obj.start_date.minute, obj.start_date.second),
                     "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
                 })
-
-            print(data)
-
             return Response({"data": data}, status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
