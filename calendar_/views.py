@@ -168,8 +168,7 @@ class ConsultantTimeAPI(APIView):
 
     def put(self, request, ConsultantTimeId, ):
         try:
-            consultant_time = ConsultantTime.objects.select_for_update().filter(id=ConsultantTimeId).select_related(
-                "consultant").select_related('user')
+            consultant_time = ConsultantTime.objects.select_for_update().filter(id=ConsultantTimeId)
             with transaction.atomic():
                 if len(consultant_time) == 0:
                     return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
@@ -200,8 +199,7 @@ class ConsultantTimeAPI(APIView):
 
     def delete(self, request, ConsultantTimeId):
         try:
-            consultant_time = ConsultantTime.objects.select_for_update().filter(id=ConsultantTimeId).select_related(
-                "consultant").select_related("user")
+            consultant_time = ConsultantTime.objects.select_for_update().filter(id=ConsultantTimeId)
             with transaction.atomic():
                 if len(consultant_time) == 0:
                     return Response({"error": "شناسه زمان مشاوره موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
