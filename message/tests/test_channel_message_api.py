@@ -50,6 +50,16 @@ class PrivateChannelMessageApiTest(TestCase):
             if message_file is not None:
                 message_file.close()
 
+    def test_un_authorize_client(self):
+        response = self.client.put(self.url + "1/1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.post(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.delete(self.url + "1/1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
     def test_get_channel_message_invalid_channel_id(self):
         self.client.force_authenticate(self.consultant)
         response = self.client.get(self.url + '3/')
