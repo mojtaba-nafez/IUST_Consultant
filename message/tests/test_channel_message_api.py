@@ -68,7 +68,6 @@ class PrivateChannelMessageApiTest(TestCase):
         self.client.force_authenticate(self.secretary)
         file = File(open(self.message_files_address[1], 'rb'))
         payload = {
-            'id': 21,
             'text': "salam",
             "message_type": "t",
             "message_file": file
@@ -77,3 +76,41 @@ class PrivateChannelMessageApiTest(TestCase):
         file.close()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), {"error": "شناسه کانال موجود نیست"})
+
+    def test_post_channel_message_forbidden(self):
+        self.client.force_authenticate(self.normal_user)
+        file = File(open(self.message_files_address[1], 'rb'))
+        payload = {
+            'id': 21,
+            'text': "salam",
+            "message_type": "i",
+            "message_file": file
+        }
+        response = self.client.post(self.url + "1/", payload)
+        file.close()
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما مجوز انجام این کار را ندارید"})
+
+    def test_post_channel_message_consultant_successfully(self):
+        self.client.force_authenticate(self.consultant)
+        file = File(open(self.message_files_address[1], 'rb'))
+        payload = {
+            'text': "salam",
+            "message_type": "i",
+            "message_file": file
+        }
+        response = self.client.post(self.url + "1/", payload)
+        file.close()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_post_channel_message_secretary_successfully(self):
+        self.client.force_authenticate(self.secretary)
+        file = File(open(self.message_files_address[1], 'rb'))
+        payload = {
+            'text': "salam",
+            "message_type": "i",
+            "message_file": file
+        }
+        response = self.client.post(self.url + "1/", payload)
+        file.close()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
