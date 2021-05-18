@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import render
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken, APIView
@@ -34,6 +35,15 @@ class UserSignupAPI(ObtainAuthToken):
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError as unique_constraint_error:
+            if unique_constraint_error.__str__().__contains__("username"):
+                return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unique_constraint_error.__str__().__contains__("email"):
+                return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unique_constraint_error.__str__().__contains__("phone_number"):
+                return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -50,9 +60,9 @@ class LoginAPI(ObtainAuthToken):
                 if len(user) == 0:
                     user = BaseUser.objects.filter(email=serializer.validated_data['email_username'])
                 if len(user) == 0:
-                    return Response({'error': 'This user not found'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'کاربری با این مشخصات وجود ندارد'}, status=status.HTTP_400_BAD_REQUEST)
                 if user[0].password != serializer.validated_data['password']:
-                    return Response({'error': 'The password is not true'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'رمز‌عبور صحیح نیست'}, status=status.HTTP_400_BAD_REQUEST)
                 token, created = Token.objects.get_or_create(user=user[0])
                 if user[0].user_type == "normal_user":
                     user = UserProfile.objects.filter(baseuser_ptr=user[0])
@@ -149,7 +159,7 @@ class AnotherUserProfileAPI(APIView):
             else:
                 user = UserProfile.objects.filter(username=username)
                 if len(user) == 0:
-                    return Response({"error": "This username not found"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "کاربری با این نام‌کاربری موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     user_serializer = UserProfileSerializer(user[0])
             user_profile = user_serializer.data
