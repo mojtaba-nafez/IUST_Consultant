@@ -66,12 +66,14 @@ class PrivateChannelMessageApiTest(TestCase):
 
     def test_post_channel_message_invalid_channel_id(self):
         self.client.force_authenticate(self.secretary)
+        file = File(open(self.message_files_address[1], 'rb'))
         payload = {
             'id': 21,
             'text': "salam",
             "message_type": "t",
-            "message_file": None
+            "message_file": file
         }
         response = self.client.post(self.url + "10/", payload)
+        file.close()
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), {"error": "شناسه کانال موجود نیست"})
