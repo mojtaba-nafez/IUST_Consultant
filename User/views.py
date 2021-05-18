@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.shortcuts import render
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken, APIView
@@ -34,6 +35,15 @@ class UserSignupAPI(ObtainAuthToken):
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError as unique_constraint_error:
+            if unique_constraint_error.__str__().__contains__("username"):
+                return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unique_constraint_error.__str__().__contains__("email"):
+                return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unique_constraint_error.__str__().__contains__("phone_number"):
+                return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

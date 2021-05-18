@@ -37,7 +37,7 @@ class BaseUserSerializer(serializers.Serializer):
         """
         import re
         if len(phone_number) != 11 or re.search(r"09[0-9]{9}", phone_number) is None:
-            raise serializers.ValidationError("Format of phone_number is not true")
+            raise serializers.ValidationError("فرمت شماره‌تلفن صحیح نیست")
         return phone_number
 
 

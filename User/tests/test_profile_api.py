@@ -104,16 +104,3 @@ class PrivateUserProfileTest(TestCase):
                           'private_profile': False, 'user_type': 'Immigration',
                           'certificate': 'https://res.cloudinary.com/iust/image/upload/File%28certificate%29'},
                          json.loads(response.content))
-
-
-class PublicSignUpTest(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user_signup_url = "user/signup/"
-        self.consultant_signup_url = "consultant/signup/"
-
-    def test_sign_up_invalid_phone_number(self):
-        payload = {
-
-        }
-        response = self.client.post(self.user_signup_url, payload)
