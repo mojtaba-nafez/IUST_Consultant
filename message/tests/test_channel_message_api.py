@@ -114,3 +114,45 @@ class PrivateChannelMessageApiTest(TestCase):
         response = self.client.post(self.url + "1/", payload)
         file.close()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_channel_message_invalid_message_id(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "1/100/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه‌ی پیام صحیح نیست"})
+
+    def test_delete_channel_message_invalid_channel_id(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "100/1/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه‌ی کانال صحیح نیست"})
+
+    def test_delete_channel_message_noncompliance_channel_message_id(self):
+        another_consultant = ConsultantProfile.objects.create(username="test2", phone_number="09184576129",
+                                                              first_name="hossein", last_name="masoudi",
+                                                              email="test12@gmailcom", password="123456",
+                                                              certificate="111", user_type='Lawyer')
+        another_channel = Channel.objects.create(name="test", description="test", invite_link='test2',
+                                                 consultant=another_consultant)
+        self.client.force_authenticate(another_consultant)
+        response = self.client.delete(self.url + "2/1/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه‌ی کانال و پیام با هم مطابقت ندارد"})
+
+    def test_delete_channel_message_forbidden(self):
+        self.client.force_authenticate(self.normal_user)
+        response = self.client.delete(self.url + "1/1/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما مجوز چنین کاری را ندارید"})
+
+    def test_delete_channel_message_consultant_successfully(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "1/1/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content), "پیام حذف شد")
+
+    def test_delete_channel_message_secretary_successfully(self):
+        self.client.force_authenticate(self.secretary)
+        response = self.client.delete(self.url + "1/1/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content), "پیام حذف شد")
