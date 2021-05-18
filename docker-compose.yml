@@ -11,8 +11,7 @@ services:
       - consultant_static_volume:/consultant/static
       - consultant_files_volume:/consultant/files
     command: >
-      sh -c " python manage.py migrate &&
-              python manage.py runserver 0.0.0.0:8000"
+      sh -c " python manage.py migrate"
     restart: always
     ports:
       - "8000:8000"

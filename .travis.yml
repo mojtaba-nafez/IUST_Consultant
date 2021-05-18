@@ -6,16 +6,24 @@ services:
   - docker
 # - postgres
 
+before_install:
+  - git checkout Dockerization
+
 install:
     - pip install -r requirements.txt
 
-before_script: pip install docker-compose
-
+before_script:
+  - pip install docker-compose
+  - docker network create consultant_network
+  - docker network create nginx_network
+  - docker volume create consultant_postgresql
+  - docker volume create consultant_static_volume
+  - docker volume create consultant_files_volume
+  
 script:
-  - docker-compose up
   - docker-compose run --rm consultant sh -c "python manage.py test"
 deploy:
-    provider: script
-    skip_cleanup: true
-    on:
-        branch: Dockerization
+  provider: script
+  skip_cleanup: true
+  on:
+    branch: Dockerization

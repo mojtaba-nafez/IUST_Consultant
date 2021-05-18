@@ -15,3 +15,4 @@ RUN pip install -r requirements.txt
 
 # Collect static files
 RUN python manage.py collectstatic --no-input
+CMD gunicorn --bind 0.0.0.0:$PORT Consultant.wsgi

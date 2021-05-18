@@ -1,8 +1,8 @@
 #!/bin/bash
 
-sudo docker login --username $HEROKU_DOCKER_USERNAME --password $HEROKU_AUTH_TOKEN registry.heroku.com
-sudo docker tag webapp-dpdth:latest registry.heroku.com/webapp-dpdth/web
-if [ $TRAVIS_BRANCH == "Deployment" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then sudo docker push registry.heroku.com/webapp-dpdth/web; fi
+sudo docker login --username "mojtabanafez96@gmail.com" --password "b7a69d7c-73a7-4edd-bb12-2c0b52a2094f" registry.heroku.com
+sudo docker tag consultant-iust:latest registry.heroku.com/consultant-iust/web
+if [ $TRAVIS_BRANCH == "Dockerization" ] && [ $TRAVIS_PULL_REQUEST == "false" ]; then sudo docker push registry.heroku.com/consultant-se-iust/consultant; fi
 
 chmod +x heroku-container-release.sh
 sudo chown $USER:docker ~/.docker

@@ -13,6 +13,7 @@ admin12345
 python manage.py makemigrations User calendar_ channel chat_room message request
 
 
+docker-compose run --rm consultant sh -c "python manage.py createsuperuser"
 
 docker-compose run --rm consultant sh -c "python manage.py test"
 docker-compose run --rm consultant sh -c "python manage.py makemigrations User calendar_ channel chat_room message request"
