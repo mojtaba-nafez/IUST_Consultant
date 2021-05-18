@@ -60,9 +60,9 @@ class LoginAPI(ObtainAuthToken):
                 if len(user) == 0:
                     user = BaseUser.objects.filter(email=serializer.validated_data['email_username'])
                 if len(user) == 0:
-                    return Response({'error': 'This user not found'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'کاربری با این مشخصات وجود ندارد'}, status=status.HTTP_400_BAD_REQUEST)
                 if user[0].password != serializer.validated_data['password']:
-                    return Response({'error': 'The password is not true'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'رمز‌عبور صحیح نیست'}, status=status.HTTP_400_BAD_REQUEST)
                 token, created = Token.objects.get_or_create(user=user[0])
                 if user[0].user_type == "normal_user":
                     user = UserProfile.objects.filter(baseuser_ptr=user[0])
