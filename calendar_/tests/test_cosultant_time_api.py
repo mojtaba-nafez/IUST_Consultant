@@ -268,6 +268,62 @@ class PrivateConsultantTimeTest(TestCase):
         self.assertEqual(json.loads(response.content),
                          {'error': {'non_field_errors': ['زمان پایان از زمان شروع قدیمی تر است']}})
 
+    def test_interference_consultant_time_post_request(self):
+        self.client.force_authenticate(self.consultant)
+        timezone = pytz.timezone('UTC')
+        start_date = timezone.localize(datetime.datetime(2026, 1, 1, 19, 00)).__str__()
+        end_date = timezone.localize(datetime.datetime(2026, 1, 1, 19, 45)).__str__()
+        payload = {
+            "title": "consultant_time",
+            "description": "consultant_time",
+            "start_date": start_date,
+            'end_date': end_date
+        }
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {'error': "با ساعت‌مشاوره‌ی دیگری تداخل دارد",
+                          "consultant_time_id": self.un_reserved_consultant_time.id})
+        start_date = timezone.localize(datetime.datetime(2026, 1, 1, 15, 00)).__str__()
+        end_date = timezone.localize(datetime.datetime(2026, 1, 1, 18, 45)).__str__()
+        payload = {
+            "title": "consultant_time",
+            "description": "consultant_time",
+            "start_date": start_date,
+            'end_date': end_date
+        }
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {'error': "با ساعت‌مشاوره‌ی دیگری تداخل دارد",
+                          "consultant_time_id": self.un_reserved_consultant_time.id})
+        start_date = timezone.localize(datetime.datetime(2026, 1, 1, 18, 15)).__str__()
+        end_date = timezone.localize(datetime.datetime(2026, 1, 1, 18, 45)).__str__()
+        payload = {
+            "title": "consultant_time",
+            "description": "consultant_time",
+            "start_date": start_date,
+            'end_date': end_date
+        }
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {'error': "با ساعت‌مشاوره‌ی دیگری تداخل دارد",
+                          "consultant_time_id": self.un_reserved_consultant_time.id})
+        start_date = timezone.localize(datetime.datetime(2026, 1, 1, 18, 45)).__str__()
+        end_date = timezone.localize(datetime.datetime(2026, 1, 1, 19, 45)).__str__()
+        payload = {
+            "title": "consultant_time",
+            "description": "consultant_time",
+            "start_date": start_date,
+            'end_date': end_date
+        }
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content),
+                         {'error': "با ساعت‌مشاوره‌ی دیگری تداخل دارد",
+                          "consultant_time_id": self.un_reserved_consultant_time.id})
+
     def test_normal_user_put_request(self):
         self.client.force_authenticate(self.normal_user)
         response = self.client.put(self.url + "1/")

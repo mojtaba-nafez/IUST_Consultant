@@ -60,11 +60,17 @@ class ConsultantTimeAPI(APIView):
             consultant_time_serializer = ConsultantTimeSerializer(data=request.data)
             if consultant_time_serializer.is_valid():
                 consultant_time_serializer.validated_data['consultant'] = consultant
-                # TODO check similar consultant times
-                if len(ConsultantTime.objects.filter(Q(consultant=consultant), Q(
-                        start_date=consultant_time_serializer.validated_data['start_date']) | Q(
-                    end_date=consultant_time_serializer.validated_data['end_date']))) != 0:
-                    return Response({"error": "شما ساعتی مشابه با این ساعت تعریف کرده اید"},
+                same_consultant_time = ConsultantTime.objects.filter(Q(consultant=consultant), Q(
+                    start_date__lte=consultant_time_serializer.validated_data['start_date'],
+                    end_date__gt=consultant_time_serializer.validated_data['start_date']) | Q(
+                    start_date__lt=consultant_time_serializer.validated_data['end_date'],
+                    end_date__gte=consultant_time_serializer.validated_data['end_date'])| Q(
+                    start_date__gte=consultant_time_serializer.validated_data['start_date'],
+                    start_date__lt=consultant_time_serializer.validated_data['end_date'])| Q(
+                    end_date__gt=consultant_time_serializer.validated_data['start_date'],
+                    end_date__lte=consultant_time_serializer.validated_data['end_date']))
+                if len(same_consultant_time) != 0:
+                    return Response({"error": "با ساعت‌مشاوره‌ی دیگری تداخل دارد", "consultant_time_id": same_consultant_time[0].id},
                                     status=status.HTTP_400_BAD_REQUEST)
                 consultant_time = consultant_time_serializer.save()
                 return Response(ConsultantTimeSerializer(consultant_time).data, status=status.HTTP_200_OK)
