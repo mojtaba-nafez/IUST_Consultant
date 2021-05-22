@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "title": "Pargar Swagger"
   },
-  "host": "localhost:8000/",
+  "host": "iust-se-consultant.herokuapp.com",
   "tags": [
     {
       "name": "User",
