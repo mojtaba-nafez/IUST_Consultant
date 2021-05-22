@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "title": "Pargar Swagger"
   },
-  "host": "iust-se-consultant.herokuapp.com",
+  "host": "localhost:8000/",
   "tags": [
     {
       "name": "User",
@@ -311,6 +311,102 @@
           },
           "400": {
             "description": "Invalid input"
+          }
+        }
+      },
+    },
+    "/consultant/search-consultants/":{
+       "get": {
+        "tags": [
+          "Consultant"
+        ],
+        "summary": "search for a set of Consultant",
+        "operationId": "SeachForConsultant",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "description": "user text for search",
+            "type": "string",
+            
+          },
+          {
+            "in": "query",
+            "name": "search_category",
+            "description": "category of Consultant (can be None or '' to search generally)",
+            "type": "string",
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number in pagination",
+            "type": "integer",
+            "required": True,
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string"
+                },
+                "previous": {
+                  "type": "string"
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "username": {
+                        "type": "string"
+                      },
+                      "avatar": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                       "first_name": {
+                        "type": "string"
+                      },
+                       "last_name": {
+                        "type": "string"
+                      },
+                      "phone_number": {
+                        "type": "string"
+                      },
+                      "private_profile": {
+                        "type": "string"
+                      },
+                      "user_type": {
+                        "type": "string"
+                      },
+                     
+                      
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden "
           }
         }
       }
@@ -1260,11 +1356,6 @@
         ],
         "summary": "search for a set of channel or specific channel between all channels or between channel of a specific category(public api)",
         "operationId": "SeachForChannel",
-        "security": [
-          {
-            "Token": []
-          }
-        ],
         "consumes": [
           "application/json"
         ],
@@ -1276,13 +1367,22 @@
             "in": "query",
             "name": "query",
             "description": "user text for search",
-            "type": "string"
+            "type": "string",
+            
           },
           {
             "in": "query",
             "name": "search_category",
-            "description": "category of channels (can be None to search generally)",
-            "type": "string"
+            "description": "category of channels (can be None or '' to search generally)",
+            "type": "string",
+
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number in pagination",
+            "type": "integer",
+            "required": True,
           }
         ],
         "responses": {
@@ -1291,23 +1391,44 @@
             "schema": {
               "type": "object",
               "properties": {
-                "data": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string"
+                },
+                "previous": {
+                  "type": "string"
+                },
+                "results": {
                   "type": "array",
                   "items": {
                     "type": "object",
                     "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "consultant": {
+                        "type": "object",
+                        "properties": {
+                          "username": {
+                            "type": "string"
+                          },
+                          "phone_number": {
+                            "type": "string"
+                          },
+                        }
+                      },
                       "name": {
                         "type": "string"
                       },
-                      "consultant_full_name": {
+                      "description": {
                         "type": "string"
                       },
                       "invite_link": {
                         "type": "string"
                       },
-                      "channelID": {
-                        "type": "integer"
-                      },
+                     
                       "avatar": {
                         "type": "string"
                       }
