@@ -36,6 +36,7 @@ urlpatterns = [
     path('calendar/', include('calendar_.urls')),
     path('fakeData/', consultant_view.InsertFakeData.as_view(), name='insert-fake-data'),
     path('chat/', chat_views.index, name='index'),
+    path('chat/<str:room_name>/', chat_views.room, name='index'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
