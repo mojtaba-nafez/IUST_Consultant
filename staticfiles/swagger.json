@@ -1417,6 +1417,12 @@
                           "phone_number": {
                             "type": "string"
                           },
+                          "first_name": {
+                            "type": "string"
+                          },
+                          "last_name": {
+                            "type": "string"
+                          },
                         }
                       },
                       "name": {
