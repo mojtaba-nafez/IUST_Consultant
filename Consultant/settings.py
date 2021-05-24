@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'corsheaders',
+    'channels',
     'User',
     'calendar_',
     'channel',
@@ -81,8 +82,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Consultant.wsgi.application'
-
+#WSGI_APPLICATION = 'Consultant.wsgi.application'
+# Channels
+ASGI_APPLICATION = 'Consultant.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
