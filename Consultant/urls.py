@@ -19,6 +19,7 @@ from django.urls import path
 from User import views as user_view
 from Consultant import views as consultant_view
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from chat_room import views as chat_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,7 +35,7 @@ urlpatterns = [
     path('swagger/', user_view.SwaggerUI.as_view(), name='swagger-ui'),
     path('calendar/', include('calendar_.urls')),
     path('fakeData/', consultant_view.InsertFakeData.as_view(), name='insert-fake-data'),
-
+    path('chat/', chat_views.index, name='index'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
