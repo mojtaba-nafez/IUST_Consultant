@@ -5,6 +5,7 @@ from rest_framework.authtoken.views import ObtainAuthToken, APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.pagination import PageNumberPagination
 
 from channel.models import Channel
 from .serializers import *
@@ -168,3 +169,40 @@ class AnotherUserProfileAPI(APIView):
             return Response(user_profile, status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class SearchConsultantPagination(PageNumberPagination):
+    page_size = 12
+    page_query_param = 'page'
+
+class SearchConsultantsAPI(APIView, SearchConsultantPagination):
+    permission_classes = []
+    def get(self, request, format=None):
+        try:
+            from django.db.models import Q
+            query = request.GET['query']  # string
+            print(query)
+            search_caregory = ''
+            if request.GET.get('search_category') != None:
+                search_caregory = request.GET['search_category']
+            if (request.GET.get('search_category') != None) and (search_caregory != ''):
+                consultant = ConsultantProfile.objects.filter(user_type=search_caregory).filter(
+                    Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query))
+                page = self.paginate_queryset(consultant, request, view=self)
+                if page is not None:
+                    consultant_serializer = self.get_paginated_response(SearchConsultantSerializer(page,
+                                                                                          many=True).data)
+                else:
+                    consultant_serializer = SearchConsultantSerializer(consultant, many=True)
+            else:
+                consultant = ConsultantProfile.objects.filter(
+                    Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query))
+                page = self.paginate_queryset(consultant, request, view=self)
+                if page is not None:
+                    consultant_serializer = self.get_paginated_response(SearchConsultantSerializer(page,
+                                                                                          many=True).data)
+                else:
+                    consultant_serializer = SearchConsultantSerializer(consultant, many=True)
+            return Response(consultant_serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response({'status': "Internal Server Error, We'll Check it later!"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
