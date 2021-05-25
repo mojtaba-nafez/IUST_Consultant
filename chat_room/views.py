@@ -13,15 +13,17 @@ class ConnectedUser(APIView):
         try:
             user_id = request.user.id
             from django.db.models import Q
+            # users = DirectMessage.objects.filter(Q(sender__id=user_id) | Q(reciever__id=user_id)).order_by('sender').distinct('sender').order_by('reciever').distinct('reciever').order_by('-date')
             
-            # receiver = DirectMessage.objects.filter(Q(sender__id=user_id) | Q(reciever__id=user_id)).order_by().values_list('reciever').distinct()
-
-            sender = DirectMessage.objects.filter(Q(reciever__id=user_id)).order_by().values_list('sender').distinct()
-            receiver = DirectMessage.objects.filter(Q(sender__id=user_id)).order_by().values_list('reciever').distinct()
-            connected_users_query_set = sender.union(receiver)
+            sender = DirectMessage.objects.filter(Q(reciever__id=user_id)).values_list('sender').distinct().values_list('sender', 'date')
+            receiver = DirectMessage.objects.filter(Q(sender__id=user_id)).values_list('reciever').distinct().values_list('reciever', 'date')
+            connected_users_query_set = [i[0] for i in list(sender.union(receiver).order_by('-date'))]
+            connected_users_query_set = list(set(connected_users_query_set))
             connected_users_list = []
+         
+            
             for user_id in connected_users_query_set:
-                user = BaseUser.objects.get(id=user_id[0])
+                user = BaseUser.objects.get(id=user_id)
                 connected_users_list.append(
                     {
                         "id" : user.id,
@@ -39,3 +41,7 @@ class ConnectedUser(APIView):
 
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class Message(APIView):
+    def get(self, request, UserID, format=None):
+        pass
