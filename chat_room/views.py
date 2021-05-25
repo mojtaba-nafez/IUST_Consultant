@@ -3,7 +3,10 @@ from rest_framework import status, exceptions
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Q
 
+from .serializers import *
 from User.models import ConsultantProfile, UserProfile, BaseUser
 from message.models import DirectMessage
 
@@ -12,7 +15,6 @@ class ConnectedUser(APIView):
     def get(self, request, format=None):
         try:
             user_id = request.user.id
-            from django.db.models import Q
             # users = DirectMessage.objects.filter(Q(sender__id=user_id) | Q(reciever__id=user_id)).order_by('sender').distinct('sender').order_by('reciever').distinct('reciever').order_by('-date')
             
             sender = DirectMessage.objects.filter(Q(reciever__id=user_id)).values_list('sender').distinct().values_list('sender', 'date')
@@ -42,6 +44,25 @@ class ConnectedUser(APIView):
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class Message(APIView):
+class ChannelMessagePagination(PageNumberPagination):
+    page_size = 20
+    page_query_param = 'page'
+
+
+class MessageHistory(APIView, ChannelMessagePagination):
+    permission_classes = [IsAuthenticated]
     def get(self, request, UserID, format=None):
-        pass
+        try:
+            me = request.user
+            messages = DirectMessage.objects.filter( (Q(sender=me) & Q(reciever__id=UserID)) | (Q(sender__id=UserID) & Q(reciever__id=me.id))).order_by('-date')
+            page = self.paginate_queryset(messages, request, view=self)
+            if page is not None:
+                message_serializer = self.get_paginated_response(DirectMessageSerializer(page,
+                                                                                          many=True).data)
+            else:
+                message_serializer = DirectMessageSerializer(messages, many=True)
+            return Response(message_serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
