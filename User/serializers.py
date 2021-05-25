@@ -66,3 +66,15 @@ class ConsultantProfileSerializer(BaseUserSerializer):
     def validate_certificate(self, certificate_file):
         # TODO CHECK CERTIFICATE EXTENSION
         return certificate_file
+
+
+class SearchConsultantSerializer(BaseUserSerializer):
+    consultant_types = (
+        ('Lawyer', 'Lawyer'),
+        ('medical', 'medical'),
+        ('EntranceExam', 'EntranceExam'),
+        ('Psychology', 'Psychology'),
+        ('Immigration', 'Immigration'),
+        ('AcademicAdvice', 'AcademicAdvice')
+    )
+    user_type = serializers.ChoiceField(choices=consultant_types, required=True)
