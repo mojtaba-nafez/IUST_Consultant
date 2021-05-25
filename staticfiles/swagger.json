@@ -42,6 +42,10 @@
     {
       "name": "Calendar",
       "description": "Everything about calendar"
+    },
+    {
+      "name": "Direct",
+      "description": "Everything about Direct can be implement in api"
     }
   ],
   "schemes": [
@@ -2607,7 +2611,152 @@
           }
         }
       }
-    }
+    },
+     "/direct/":{
+       "get": {
+        "tags": [
+          "Direct"
+        ],
+        "summary": "List of Connecting User(has chat with them)",
+        "operationId": "DirectMessage",
+         "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "username": {
+                    "type": "string"
+                  },
+                  "avatar": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                   "first_name": {
+                    "type": "string"
+                  },
+                   "last_name": {
+                    "type": "string"
+                  },
+                  "phone_number": {
+                    "type": "string"
+                  },
+                  "user_type": {
+                    "type": "string"
+                  },
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden "
+          }
+        }
+      }
+    },
+    "/direct/{UserID}/":{
+       "get": {
+        "tags": [
+          "Direct"
+        ],
+        "summary": "Get History of Direct message with specific user",
+        "operationId": "DirectMessageHistory",
+         "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+           {
+            "in": "path",
+            "name": "UserID",
+            "description": "Direct of who?",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "page number in pagination(for history message)",
+            "type": "integer",
+            "required": True,
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "next": {
+                  "type": "string"
+                },
+                "previous": {
+                  "type": "string"
+                },
+                "results": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "sender_id": {
+                        "type": "integer"
+                      },
+                      "reciever_id": {
+                        "type": "integer"
+                      },
+                      "text": {
+                        "type": "string"
+                      },
+                      "message_type": {
+                        "type": "string"
+                      },
+                      "message_file":
+                      {
+                        "type": "string"
+                      },
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden "
+          }
+        }
+      }
+    },
   },
   "securityDefinitions": {
     "Token": {
