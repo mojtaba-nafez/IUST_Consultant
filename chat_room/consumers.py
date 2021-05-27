@@ -1,18 +1,44 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
+from django.contrib.auth.models import AnonymousUser
+from channels.exceptions import StopConsumer
 
 
 class DirectConsumer(JsonWebsocketConsumer):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = None
+        self.room_group_name = None
+
     def connect(self):
-        self.room_group_name = 'direct_%s' % self.scope['url_route']['kwargs']['room_name']
+        self.accept()
+        # check user is not AnonymousUser
+        if isinstance(self.scope['user'], AnonymousUser):
+            self.send_json(content={
+                "message": "شما باید ابتدا وارد حساب کاربری خود شوید",
+                "type": "error"
+            })
+            self.close()
+            raise StopConsumer()
+        else:
+            self.user = self.scope['user']
+        room_name = self.scope['url_route']['kwargs']['room_name']
+        room_usernames = room_name.split('-')
+        if self.user.username not in room_usernames:
+            self.send_json(content={
+                "message": "اسم گروه صحیح نیست",
+                "type": "error"
+            })
+            self.close()
+            raise StopConsumer()
+        self.room_group_name = 'direct-%s' % room_name
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
         )
-        self.accept()
 
     def disconnect(self, close_code):
         # Leave room group
@@ -23,22 +49,12 @@ class DirectConsumer(JsonWebsocketConsumer):
 
     # Receive message from WebSocket
     def receive_json(self, content, **kwargs):
-        message = content['message']
-
+        
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message
-            }
-        )
+            self.room_group_name, content)
 
     # Receive message from room group
     def chat_message(self, event):
-        message = event['message']
-
         # Send message to WebSocket
-        self.send_json(content={
-            'message': message
-        })
+        self.send_json(content=event)
