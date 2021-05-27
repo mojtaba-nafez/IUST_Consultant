@@ -168,9 +168,9 @@ class UserChannelsAPI(APIView):
 class UserRoleInChannelAPI(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, channelId, format=None):
+    def get(self, request, ChannelId, format=None):
         try:
-            channel = Channel.objects.filter(id=channelId).select_related('consultant')
+            channel = Channel.objects.filter(id=ChannelId).select_related('consultant')
             if len(channel) == 0:
                 return Response({"error": "This channel id is not exits"}, status=status.HTTP_400_BAD_REQUEST)
             if channel[0].consultant.id == request.user.id:
