@@ -24,10 +24,10 @@ script:
   - docker-compose run --rm consultant sh -c "python manage.py test"
 deploy:
   provider: script
-  script: (
-      echo "mojtabanafez96@gmail.com"
-      echo "Mojtaba1377@"
-    ) | heroku login -i
+  script:
+    - heroku container:login
+    - heroku container:push web
+    - heroku container:release 
   skip_cleanup: true
   on:
     branch: Dockerization
