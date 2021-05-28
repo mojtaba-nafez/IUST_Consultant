@@ -9,6 +9,7 @@ admin
 admin.iust.ac.ir
 admin12345
 
+heroku container:push web  --app consultant-iust
 
 python manage.py makemigrations User calendar_ channel chat_room message request
 
