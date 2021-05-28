@@ -25,9 +25,7 @@ script:
 deploy:
   provider: script
   script:
-    - heroku container:login
-    - heroku container:push web
-    - heroku container:release 
+    heroku container:login && heroku container:push consultant-iust && heroku container:release 
   skip_cleanup: true
   on:
     branch: Dockerization
