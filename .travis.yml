@@ -27,7 +27,7 @@ deploy:
   script: (
       echo "$HEROKU_CREDENTIALS_EMAIL"
       echo "$HEROKU_CREDENTIALS_PASSWORD"
-    ) | heroku login --interactive
+    ) | heroku login -i
   skip_cleanup: true
   on:
     branch: Dockerization
