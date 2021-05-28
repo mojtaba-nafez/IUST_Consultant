@@ -37,7 +37,7 @@ class BaseUserSerializer(serializers.Serializer):
         """
         import re
         if len(phone_number) != 11 or re.search(r"09[0-9]{9}", phone_number) is None:
-            raise serializers.ValidationError("Format of phone_number is not true")
+            raise serializers.ValidationError("فرمت شماره‌تلفن صحیح نیست")
         return phone_number
 
 
@@ -66,3 +66,15 @@ class ConsultantProfileSerializer(BaseUserSerializer):
     def validate_certificate(self, certificate_file):
         # TODO CHECK CERTIFICATE EXTENSION
         return certificate_file
+
+
+class SearchConsultantSerializer(BaseUserSerializer):
+    consultant_types = (
+        ('Lawyer', 'Lawyer'),
+        ('medical', 'medical'),
+        ('EntranceExam', 'EntranceExam'),
+        ('Psychology', 'Psychology'),
+        ('Immigration', 'Immigration'),
+        ('AcademicAdvice', 'AcademicAdvice')
+    )
+    user_type = serializers.ChoiceField(choices=consultant_types, required=True)

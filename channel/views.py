@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
 from User.models import UserProfile
 from .serializers import *
@@ -162,8 +163,6 @@ class UserChannelsAPI(APIView):
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 class UserRoleInChannelAPI(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -187,7 +186,6 @@ class UserRoleInChannelAPI(APIView):
                             status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class ChannelSubscriptionAPI(APIView):
@@ -224,9 +222,6 @@ class ChannelSubscriptionAPI(APIView):
                 return Response({"error": subscription_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
 
 
 class ChannelSubscribers(APIView):
@@ -281,8 +276,6 @@ class ChannelSubscribers(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
 class ChannelAdmins(APIView):
     permission_classes = []
 
@@ -319,14 +312,12 @@ class ChannelAdmins(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class SearchConsultantPagination(PageNumberPagination):
+    page_size = 12
+    page_query_param = 'page'
 
 
-
-
-
-
-
-class SearchChannel(APIView):
+class SearchChannel(APIView, SearchConsultantPagination):
     permission_classes = []
 
     def get(self, request, format=None):
@@ -336,32 +327,25 @@ class SearchChannel(APIView):
             search_caregory = ''
             if request.GET.get('search_category') != None:
                 search_caregory = request.GET['search_category']
-            data = []
-            if (request.GET.get('search_category') != None) or (search_caregory != ''):
-                #  ch = Channel.objects.filter(consultant==)
-                Channels = Channel.objects.filter(consultant__user_type=search_caregory).filter(
+            if (request.GET.get('search_category') != None) and (search_caregory != ''):
+                channels = Channel.objects.filter(consultant__user_type=search_caregory).filter(
                     Q(name__icontains=query) | Q(description__icontains=query))
-                for channel in Channels:
-                    data.append({
-                        'name': channel.name,
-                        'consultant_full_name': channel.consultant.first_name + " " + channel.consultant.last_name,
-                        'invite_link': channel.invite_link,
-                        'channelID': channel.pk,
-                        'avatar': channel.avatar.url if channel.avatar else None,
-                    })
+                page = self.paginate_queryset(channels, request, view=self)
+                if page is not None:
+                    consultant_serializer = self.get_paginated_response(ChannelSerializer(page,
+                                                                                          many=True).data)
+                else:
+                    consultant_serializer = ChannelSerializer(channels, many=True)
+
             else:
-                Channels = Channel.objects.filter(Q(name__icontains=query) | Q(description__icontains=query))
-                for channel in Channels:
-                    data.append({
-                        'name': channel.name,
-                        'consultant_full_name': channel.consultant.first_name + " " + channel.consultant.last_name,
-                        'invite_link': channel.invite_link,
-                        'channelID': channel.pk,
-                        'avatar': channel.avatar.url if channel.avatar else None,
-
-                    })
-
-            return Response({'data': data}, status=status.HTTP_200_OK)
+                channels = Channel.objects.filter(Q(name__icontains=query) | Q(description__icontains=query))
+                page = self.paginate_queryset(channels, request, view=self)
+                if page is not None:
+                    consultant_serializer = self.get_paginated_response(ChannelSerializer(page,
+                                                                                          many=True).data)
+                else:
+                    consultant_serializer = ChannelSerializer(channels, many=True)
+            return Response(consultant_serializer.data, status=status.HTTP_200_OK)
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -393,5 +377,3 @@ class SuggestionChannel(APIView):
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-

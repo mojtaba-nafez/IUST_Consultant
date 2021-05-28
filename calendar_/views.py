@@ -64,20 +64,19 @@ class Reserve(APIView):
             consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID, start_date__gte=start_day,
                                                             start_date__lte=end_day)
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "+00:00"
-
-            obsolete_filled_time = consultant_time.exclude(user=None, end_date__gt=current_time)
-            obsolete_empty_time = consultant_time.exclude(end_date__gt=current_time).filter(user=None)
+            
+            obsolete_filled_time = consultant_time.exclude(start_date__gt=current_time).exclude(user=None)
+            obsolete_empty_time = consultant_time.exclude(start_date__gt=current_time).filter(user=None)
 
             empty_time = consultant_time.exclude(start_date__lt=current_time).filter(user=None)
-            filled_time = consultant_time.exclude(start_date__lt=current_time, user=None)
-            print("herrrreeee")
+            filled_time = consultant_time.exclude(start_date__lt=current_time).exclude(user=None)
+
             data = {
                 "obsolete_reserved_time": [],
                 "obsolete_empty_time": [],
                 "empty_time": [],
                 "reserved_time": [],
             }
-
             for i in range(len(obsolete_filled_time)):
                 obj = obsolete_filled_time[i]
                 data["obsolete_reserved_time"].append({
@@ -102,9 +101,6 @@ class Reserve(APIView):
                     "start_time": datetime.time(obj.start_date.hour, obj.start_date.minute, obj.start_date.second),
                     "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
                 })
-
-            print(data)
-
             return Response({"data": data}, status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -157,11 +153,18 @@ class ConsultantTimeAPI(APIView):
             consultant_time_serializer = ConsultantTimeSerializer(data=request.data)
             if consultant_time_serializer.is_valid():
                 consultant_time_serializer.validated_data['consultant'] = consultant
-                # TODO check similar consultant times
-                if len(ConsultantTime.objects.filter(Q(consultant=consultant), Q(
-                        start_date=consultant_time_serializer.validated_data['start_date']) | Q(
-                    end_date=consultant_time_serializer.validated_data['end_date']))) != 0:
-                    return Response({"error": "شما ساعتی مشابه با این ساعت تعریف کرده اید"},
+                same_consultant_time = ConsultantTime.objects.filter(Q(consultant=consultant), Q(
+                    start_date__lte=consultant_time_serializer.validated_data['start_date'],
+                    end_date__gt=consultant_time_serializer.validated_data['start_date']) | Q(
+                    start_date__lt=consultant_time_serializer.validated_data['end_date'],
+                    end_date__gte=consultant_time_serializer.validated_data['end_date']) | Q(
+                    start_date__gte=consultant_time_serializer.validated_data['start_date'],
+                    start_date__lt=consultant_time_serializer.validated_data['end_date']) | Q(
+                    end_date__gt=consultant_time_serializer.validated_data['start_date'],
+                    end_date__lte=consultant_time_serializer.validated_data['end_date']))
+                if len(same_consultant_time) != 0:
+                    return Response({"error": "با ساعت‌مشاوره‌ی دیگری تداخل دارد",
+                                     "consultant_time_id": same_consultant_time[0].id},
                                     status=status.HTTP_400_BAD_REQUEST)
                 consultant_time = consultant_time_serializer.save()
                 return Response(ConsultantTimeSerializer(consultant_time).data, status=status.HTTP_200_OK)
@@ -193,7 +196,20 @@ class ConsultantTimeAPI(APIView):
                                          "reservatore": {"username": consultant_time.user.username,
                                                          "phone_number": consultant_time.user.phone_number}},
                                         status=status.HTTP_202_ACCEPTED)
-                    # TODO check similar consultant times
+                    same_consultant_time = ConsultantTime.objects.filter(
+                        ~Q(id=consultant_time.id), Q(consultant=consultant_time.consultant), Q(
+                            start_date__lte=consultant_time_serializer.validated_data['start_date'],
+                            end_date__gt=consultant_time_serializer.validated_data['start_date']) | Q(
+                            start_date__lt=consultant_time_serializer.validated_data['end_date'],
+                            end_date__gte=consultant_time_serializer.validated_data['end_date']) | Q(
+                            start_date__gte=consultant_time_serializer.validated_data['start_date'],
+                            start_date__lt=consultant_time_serializer.validated_data['end_date']) | Q(
+                            end_date__gt=consultant_time_serializer.validated_data['start_date'],
+                            end_date__lte=consultant_time_serializer.validated_data['end_date']))
+                    if len(same_consultant_time) != 0:
+                        return Response({"error": "با ساعت‌مشاوره‌ی دیگری تداخل دارد",
+                                         "consultant_time_id": same_consultant_time[0].id},
+                                        status=status.HTTP_400_BAD_REQUEST)
                     consultant_time_serializer.save()
                     return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
                 else:
