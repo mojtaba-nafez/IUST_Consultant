@@ -25,8 +25,8 @@ script:
 deploy:
   provider: script
   script: (
-      echo "$HEROKU_CREDENTIALS_EMAIL"
-      echo "$HEROKU_CREDENTIALS_PASSWORD"
+      echo "mojtabanafez96@gmail.com"
+      echo "Mojtaba1377@"
     ) | heroku login -i
   skip_cleanup: true
   on:
