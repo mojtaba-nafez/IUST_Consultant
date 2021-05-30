@@ -41,7 +41,7 @@ class ChatMessageSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         instance.text = validated_data.get('text', instance.text)
-        instance.message_type = validated_data.get('text', instance.message_type)
-        instance.message_file = validated_data.get('text', instance.message_file)
+        instance.message_type = validated_data.get('message_type', instance.message_type)
+        instance.message_file = validated_data.get('message_file', instance.message_file)
         instance.save()
         return instance

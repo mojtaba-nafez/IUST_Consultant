@@ -27,11 +27,14 @@ class ChatMessageAPI(APIView):
         try:
             chat_message_serializer = ChatMessageSerializer(data=request.data)
             if chat_message_serializer.is_valid():
-                receiver = BaseUser.objects.filter(id=chat_message_serializer.receiver_id)
+                receiver = BaseUser.objects.filter(id=chat_message_serializer.validated_data['receiver_id'])
                 if len(receiver) == 0:
                     return Response({"error": "شناسه دریافت‌کننده درست نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     receiver = receiver[0]
+                if len(ConsultantProfile.objects.filter(
+                        Q(id=request.user.id) | Q(id=chat_message_serializer.validated_data['receiver_id']))) == 0:
+                    return Response({"error": "یک سمت‌پیام باید مشاور باشد"}, status=status.HTTP_403_FORBIDDEN)
                 chat_message_serializer.validated_data['sender'] = request.user
                 chat_message_serializer.validated_data['receiver'] = receiver
                 chat_message_serializer.save()
@@ -67,8 +70,7 @@ class ChatMessageAPI(APIView):
             else:
                 chat_message = chat_message[0]
 
-            if (chat_message.sender is not None and chat_message.sender.username == request.user.username) or (
-                    chat_message.receiver is not None and chat_message.receiver.username == request.user.username):
+            if chat_message.sender is not None and chat_message.sender.username == request.user.username:
                 chat_message_serializer = ChatMessageSerializer(chat_message, data=request.data)
                 if chat_message_serializer.is_valid():
                     chat_message_serializer.save()
