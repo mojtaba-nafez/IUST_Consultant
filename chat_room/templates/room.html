@@ -18,12 +18,7 @@
             + window.location.host
             + '/ws/chat/'
             + roomName
-            + '/',
-            {
-                headers:{
-                    authorization: "Token 33cf3f3a1c87dff9a9c7bad89d7ca1a5e61854fa"
-                }
-            }
+            + '/'
         );
 
         chatSocket.onmessage = function(e) {

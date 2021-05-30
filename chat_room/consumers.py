@@ -24,7 +24,7 @@ class DirectConsumer(JsonWebsocketConsumer):
             raise StopConsumer()
         else:
             self.user = self.scope['user']
-        room_name = self.scope['url_route']['kwargs']['room_name']
+        room_name = self.scope['url_route']['kwargs']['RoomName']
         room_usernames = room_name.split('-')
         if self.user.username not in room_usernames:
             self.send_json(content={

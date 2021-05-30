@@ -49,7 +49,8 @@
     }
   ],
   "schemes": [
-    "http"
+    "http",
+    "ws"
   ],
   "paths": {
     "/user/signup/": {
@@ -317,10 +318,10 @@
             "description": "Invalid input"
           }
         }
-      },
+      }
     },
-    "/consultant/search-consultants/":{
-       "get": {
+    "/consultant/search-consultants/": {
+      "get": {
         "tags": [
           "Consultant"
         ],
@@ -337,21 +338,20 @@
             "in": "query",
             "name": "query",
             "description": "user text for search",
-            "type": "string",
-            
+            "type": "string"
           },
           {
             "in": "query",
             "name": "search_category",
             "description": "category of Consultant (can be None or '' to search generally)",
-            "type": "string",
+            "type": "string"
           },
           {
             "in": "query",
             "name": "page",
             "description": "page number in pagination",
             "type": "integer",
-            "required": True,
+            "required": true
           }
         ],
         "responses": {
@@ -386,10 +386,10 @@
                       "email": {
                         "type": "string"
                       },
-                       "first_name": {
+                      "first_name": {
                         "type": "string"
                       },
-                       "last_name": {
+                      "last_name": {
                         "type": "string"
                       },
                       "phone_number": {
@@ -400,9 +400,7 @@
                       },
                       "user_type": {
                         "type": "string"
-                      },
-                     
-                      
+                      }
                     }
                   }
                 }
@@ -1371,22 +1369,20 @@
             "in": "query",
             "name": "query",
             "description": "user text for search",
-            "type": "string",
-            
+            "type": "string"
           },
           {
             "in": "query",
             "name": "search_category",
             "description": "category of channels (can be None or '' to search generally)",
-            "type": "string",
-
+            "type": "string"
           },
           {
             "in": "query",
             "name": "page",
             "description": "page number in pagination",
             "type": "integer",
-            "required": True,
+            "required": true
           }
         ],
         "responses": {
@@ -1426,7 +1422,7 @@
                           },
                           "last_name": {
                             "type": "string"
-                          },
+                          }
                         }
                       },
                       "name": {
@@ -1438,7 +1434,6 @@
                       "invite_link": {
                         "type": "string"
                       },
-                     
                       "avatar": {
                         "type": "string"
                       }
@@ -2612,14 +2607,14 @@
         }
       }
     },
-     "/direct/":{
-       "get": {
+    "/chat/direct/contact/": {
+      "get": {
         "tags": [
           "Direct"
         ],
         "summary": "List of Connecting User(has chat with them)",
         "operationId": "DirectMessage",
-         "security": [
+        "security": [
           {
             "Token": []
           }
@@ -2650,10 +2645,10 @@
                   "email": {
                     "type": "string"
                   },
-                   "first_name": {
+                  "first_name": {
                     "type": "string"
                   },
-                   "last_name": {
+                  "last_name": {
                     "type": "string"
                   },
                   "phone_number": {
@@ -2661,7 +2656,7 @@
                   },
                   "user_type": {
                     "type": "string"
-                  },
+                  }
                 }
               }
             }
@@ -2672,14 +2667,14 @@
         }
       }
     },
-    "/direct/{UserID}/":{
-       "get": {
+    "/chat/direct/history/{UserID}/": {
+      "get": {
         "tags": [
           "Direct"
         ],
         "summary": "Get History of Direct message with specific user",
         "operationId": "DirectMessageHistory",
-         "security": [
+        "security": [
           {
             "Token": []
           }
@@ -2691,7 +2686,7 @@
           "application/json"
         ],
         "parameters": [
-           {
+          {
             "in": "path",
             "name": "UserID",
             "description": "Direct of who?",
@@ -2703,7 +2698,7 @@
             "name": "page",
             "description": "page number in pagination(for history message)",
             "type": "integer",
-            "required": True,
+            "required": true
           }
         ],
         "responses": {
@@ -2741,10 +2736,9 @@
                       "message_type": {
                         "type": "string"
                       },
-                      "message_file":
-                      {
+                      "message_file": {
                         "type": "string"
-                      },
+                      }
                     }
                   }
                 }
@@ -2757,6 +2751,187 @@
         }
       }
     },
+    "/chat/direct/message/": {
+      "post": {
+        "tags": [
+          "Direct"
+        ],
+        "summary": "create a new chat message in direct",
+        "operationId": "createDirectMessage",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "text",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "message_file",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "message_type",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "a",
+              "i",
+              "v",
+              "t"
+            ]
+          },
+          {
+            "in": "formData",
+            "name": "receiver_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "پیام ساخته شد"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/chat/direct/message/{ChatMessageId}/": {
+      "put": {
+        "tags": [
+          "Direct"
+        ],
+        "summary": "update direct message",
+        "operationId": "updateDirectMessage",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ChatMessageId",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "description": "The direct message ID"
+          },
+          {
+            "in": "formData",
+            "name": "text",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "message_file",
+            "required": false,
+            "type": "file"
+          },
+          {
+            "in": "formData",
+            "name": "message_type",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "a",
+              "i",
+              "v",
+              "t"
+            ]
+          },
+          {
+            "in": "formData",
+            "name": "receiver_id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Direct"
+        ],
+        "summary": "get direct message",
+        "operationId": "getDirectMessage",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ChatMessageId",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "description": "The deirect message ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "message_type": {
+                  "type": "string"
+                },
+                "message_file": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    }
   },
   "securityDefinitions": {
     "Token": {
