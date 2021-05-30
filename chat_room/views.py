@@ -7,7 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from django.db.models import Q
 from .serializers import *
 from User.models import ConsultantProfile, UserProfile, BaseUser
-from message.models import DirectMessage
+from message.models import ChatMessage
 
 
 def index(request):
@@ -20,9 +20,66 @@ def room(request, room_name):
     })
 
 
-class MessageFile(APIView):
+class ChatMessage(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
+        try:
+            chat_message_serializer = ChatMessageSerializer(data=request.data)
+            if chat_message_serializer.is_valid():
+                receiver = BaseUser.objects.filter(id=chat_message_serializer.receiver_id)
+                if len(receiver) == 0:
+                    return Response({"error": "شناسه دریافت‌کننده درست نیست"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    receiver = receiver[0]
+                chat_message_serializer.validated_data['sender'] = request.user
+                chat_message_serializer.validated_data['receiver'] = receiver
+                chat_message_serializer.save()
+                return Response("پیام ساخته‌شد", status=status.HTTP_200_OK)
+            else:
+                return Response({"error": chat_message_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request, ChatMessageId):
+        try:
+            chat_message = ChatMessage.objects.filter(id=ChatMessageId).select_related('sender').select_related(
+                'receiver')
+            if len(chat_message) == 0:
+                return Response({"error": "شناسه‌ی پیام صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                chat_message = chat_message[0]
+
+            if (chat_message.sender is not None and chat_message.sender.username == request.user.username) or (
+                    chat_message.receiver is not None and chat_message.receiver.username == request.user.username):
+                return Response(ChatMessageSerializer(chat_message).data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "شما دسترسی به این پیام را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, ChatMessageId):
+        try:
+            chat_message = ChatMessage.objects.filter(id=ChatMessageId).select_related('sender').select_related(
+                'receiver')
+            if len(chat_message) == 0:
+                return Response({"error": "شناسه‌ی پیام صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                chat_message = chat_message[0]
+
+            if (chat_message.sender is not None and chat_message.sender.username == request.user.username) or (
+                    chat_message.receiver is not None and chat_message.receiver.username == request.user.username):
+                chat_message_serializer = ChatMessageSerializer(chat_message, data=request.data)
+                if chat_message_serializer.is_valid():
+                    chat_message_serializer.save()
+                    return Response("پیام بروز‌شد", status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": chat_message_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "شما دسترسی به این پیام را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ConnectedUser(APIView):
     permission_classes = [IsAuthenticated]
@@ -32,9 +89,9 @@ class ConnectedUser(APIView):
             user_id = request.user.id
             # users = DirectMessage.objects.filter(Q(sender__id=user_id) | Q(reciever__id=user_id)).order_by('sender').distinct('sender').order_by('reciever').distinct('reciever').order_by('-date')
 
-            sender = DirectMessage.objects.filter(Q(reciever__id=user_id)).values_list('sender').distinct().values_list(
+            sender = ChatMessage.objects.filter(Q(reciever__id=user_id)).values_list('sender').distinct().values_list(
                 'sender', 'date')
-            receiver = DirectMessage.objects.filter(Q(sender__id=user_id)).values_list(
+            receiver = ChatMessage.objects.filter(Q(sender__id=user_id)).values_list(
                 'reciever').distinct().values_list('reciever', 'date')
             connected_users_query_set = [i[0] for i in list(sender.union(receiver).order_by('-date'))]
             connected_users_query_set = list(set(connected_users_query_set))
@@ -72,7 +129,7 @@ class MessageHistory(APIView, ChannelMessagePagination):
     def get(self, request, UserID, format=None):
         try:
             me = request.user
-            messages = DirectMessage.objects.filter(
+            messages = ChatMessage.objects.filter(
                 (Q(sender=me) & Q(reciever__id=UserID)) | (Q(sender__id=UserID) & Q(reciever__id=me.id))).order_by(
                 '-date')
             page = self.paginate_queryset(messages, request, view=self)
