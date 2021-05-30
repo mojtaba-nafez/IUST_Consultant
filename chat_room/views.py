@@ -20,7 +20,7 @@ def room(request, room_name):
     })
 
 
-class ChatMessage(APIView):
+class ChatMessageAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
