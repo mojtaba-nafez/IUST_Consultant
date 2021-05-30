@@ -30,7 +30,7 @@ class ChannelMessage(Message):
 
 class DirectMessage(Message):
     sender = models.ForeignKey(BaseUser, verbose_name="", related_name='%(class)s_sender', on_delete=models.SET_NULL,  null=True)
-    reciever = models.ForeignKey(BaseUser, verbose_name="", related_name='%(class)s_reciever', on_delete=models.SET_NULL, null=True)
+    receiver = models.ForeignKey(BaseUser, verbose_name="", related_name='%(class)s_reciever', on_delete=models.SET_NULL, null=True)
     
     class Meta:
         verbose_name_plural = "DirectMessages"

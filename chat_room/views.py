@@ -20,6 +20,10 @@ def room(request, room_name):
     })
 
 
+class MessageFile(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+
 class ConnectedUser(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -81,5 +85,3 @@ class MessageHistory(APIView, ChannelMessagePagination):
 
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-

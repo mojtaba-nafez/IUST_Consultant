@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('text', models.TextField(blank=True, max_length=2000, null=True)),
                 ('message_file', models.FileField(blank=True, null=True, upload_to='files/message_file')),
                 ('message_type', models.CharField(choices=[('t', 'text'), ('i', 'image'), ('v', 'video'), ('a', 'audio')], default='t', max_length=1)),
-                ('reciever', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='directmessage_reciever', to=settings.AUTH_USER_MODEL, verbose_name='')),
+                ('receiver', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='directmessage_reciever', to=settings.AUTH_USER_MODEL, verbose_name='')),
                 ('sender', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='directmessage_sender', to=settings.AUTH_USER_MODEL, verbose_name='')),
             ],
             options={
