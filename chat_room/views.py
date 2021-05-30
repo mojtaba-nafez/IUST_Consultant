@@ -89,12 +89,12 @@ class ConnectedUser(APIView):
     def get(self, request, format=None):
         try:
             user_id = request.user.id
-            # users = DirectMessage.objects.filter(Q(sender__id=user_id) | Q(reciever__id=user_id)).order_by('sender').distinct('sender').order_by('reciever').distinct('reciever').order_by('-date')
+            # users = DirectMessage.objects.filter(Q(sender__id=user_id) | Q(receiver_id=user_id)).order_by('sender').distinct('sender').order_by('receiver').distinct('receiver').order_by('-date')
 
-            sender = ChatMessage.objects.filter(Q(reciever__id=user_id)).values_list('sender').distinct().values_list(
+            sender = ChatMessage.objects.filter(Q(receiver_id=user_id)).values_list('sender').distinct().values_list(
                 'sender', 'date')
             receiver = ChatMessage.objects.filter(Q(sender__id=user_id)).values_list(
-                'reciever').distinct().values_list('reciever', 'date')
+                'receiver').distinct().values_list('receiver', 'date')
             connected_users_query_set = [i[0] for i in list(sender.union(receiver).order_by('-date'))]
             connected_users_query_set = list(set(connected_users_query_set))
             connected_users_list = []
@@ -132,7 +132,7 @@ class MessageHistory(APIView, ChannelMessagePagination):
         try:
             me = request.user
             messages = ChatMessage.objects.filter(
-                (Q(sender=me) & Q(reciever__id=UserID)) | (Q(sender__id=UserID) & Q(reciever__id=me.id))).order_by(
+                (Q(sender=me) & Q(receiver__id=UserID)) | (Q(sender__id=UserID) & Q(receiver__id=me.id))).order_by(
                 '-date')
             page = self.paginate_queryset(messages, request, view=self)
             if page is not None:
