@@ -7,7 +7,9 @@ class ConsultantField(serializers.RelatedField):
     def to_representation(self, value):
         return {
             "username": value.username,
-            "phone_number": value.phone_number
+            "phone_number": value.phone_number,
+            "first_name": value.first_name,
+            "last_name": value.last_name
         }
 
 
