@@ -82,9 +82,9 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'Consultant.wsgi.application'
+WSGI_APPLICATION = 'Consultant.wsgi.application'
 # Channels
-ASGI_APPLICATION = 'Consultant.asgi.application'
+ASGI_APPLICATION = 'Consultant.routing.application'
 
 #comunication for consumers(channels)
 CHANNEL_LAYERS = {
