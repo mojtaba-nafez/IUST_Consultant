@@ -37,8 +37,8 @@ class ChatMessageAPI(APIView):
                     return Response({"error": "یک سمت‌پیام باید مشاور باشد"}, status=status.HTTP_403_FORBIDDEN)
                 chat_message_serializer.validated_data['sender'] = request.user
                 chat_message_serializer.validated_data['receiver'] = receiver
-                chat_message_serializer.save()
-                return Response("پیام ساخته‌شد", status=status.HTTP_200_OK)
+                return_data = ChatMessageSerializer(chat_message_serializer.save()).data
+                return Response(data=return_data, status=status.HTTP_200_OK)
             else:
                 return Response({"error": chat_message_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
@@ -79,6 +79,20 @@ class ChatMessageAPI(APIView):
                     return Response({"error": chat_message_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({"error": "شما دسترسی به این پیام را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, ChatMessageId):
+        try:
+            chat_message = ChatMessage.objects.filter(id=ChatMessageId).select_related('sender')
+            if len(chat_message) == 0:
+                return Response({'error': 'شناسه پیام صحیح نیست'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                chat_message = chat_message[0]
+            if chat_message.sender.id != request.user.id:
+                return Response({"error": "شما دسترسی به این‌کار ندارید"}, status=status.HTTP_403_FORBIDDEN)
+            chat_message.delete()
+            return Response("پیام حذف شد", status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
