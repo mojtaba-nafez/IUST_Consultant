@@ -141,3 +141,27 @@ class PrivateChatMessageTest(TestCase):
         self.assertEqual(chat_message.message_type, "i")
         self.assertIsNotNone(chat_message.message_file)
 
+    def test_invalid_chat_message_id_delete_chat_message(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "10/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه پیام صحیح نیست"})
+
+    def test_forbidden_delete_chat_message(self):
+        self.client.force_authenticate(self.forbidden_user)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این‌کار ندارید"})
+        self.client.force_authenticate(self.normal_user)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(json.loads(response.content), {"error": "شما دسترسی به این‌کار ندارید"})
+
+    def test_delete_chat_message_successfully(self):
+        self.client.force_authenticate(self.consultant)
+        response = self.client.delete(self.url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json.loads(response.content),"پیام حذف شد")
+
+
+
