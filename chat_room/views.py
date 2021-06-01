@@ -37,8 +37,8 @@ class ChatMessageAPI(APIView):
                     return Response({"error": "یک سمت‌پیام باید مشاور باشد"}, status=status.HTTP_403_FORBIDDEN)
                 chat_message_serializer.validated_data['sender'] = request.user
                 chat_message_serializer.validated_data['receiver'] = receiver
-                chat_message_serializer.save()
-                return Response("پیام ساخته‌شد", status=status.HTTP_200_OK)
+                return_data = ChatMessageSerializer(chat_message_serializer.save()).data
+                return Response(data=return_data, status=status.HTTP_200_OK)
             else:
                 return Response({"error": chat_message_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:

@@ -69,7 +69,12 @@ class PrivateChatMessageTest(TestCase):
         }
         response = self.client.post(self.url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(json.loads(response.content), "پیام ساخته‌شد")
+        self.assertEqual(json.loads(response.content), {
+            'id': 2,
+            "text": "GoodBy",
+            "message_type": "t",
+            "message_file": None
+        })
 
     def test_invalid_chat_message_id_get_chat_message(self):
         self.client.force_authenticate(self.consultant)
@@ -134,5 +139,5 @@ class PrivateChatMessageTest(TestCase):
         chat_message = ChatMessage.objects.filter(id=1)[0]
         self.assertEqual(chat_message.text, "GoodBy")
         self.assertEqual(chat_message.message_type, "i")
-        self.assertIsNotNone(chat_message.text)
+        self.assertIsNotNone(chat_message.message_file)
 
