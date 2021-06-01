@@ -10,7 +10,7 @@ admin.iust.ac.ir
 admin12345
 
 
-python manage.py makemigrations User calendar_ channel chat_room message 
+python manage.py makemigrations User calendar_ channel chat_room message request
 
 
 add ('auth', '__latest__') to dependency of migrations 
