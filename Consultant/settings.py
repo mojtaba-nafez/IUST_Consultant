@@ -82,7 +82,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'Consultant.wsgi.application'
+#WSGI_APPLICATION = 'Consultant.wsgi.application'
 # Channels
 ASGI_APPLICATION = 'Consultant.asgi.application'
 
