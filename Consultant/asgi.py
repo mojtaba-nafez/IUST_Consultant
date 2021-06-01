@@ -1,17 +1,20 @@
 import os
 
-from channels.layers import get_channel_layer
+from channels.auth import AuthMiddlewareStack
+from channels.http import AsgiHandler
+from channels.routing import ProtocolTypeRouter, URLRouter
+
+import chat_room.routing
+
+from Consultant.token_auth import TokenAuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Consultant.settings')
-channel_layer = get_channel_layer()
-# django.setup()
-
-# application = ProtocolTypeRouter({
-#     "http": get_wsgi_application(),
-#     "websocket": TokenAuthMiddlewareStack(
-#         URLRouter(
-#             chat_room.routing.websocket_urlpatterns
-#         )
-#     ),
-#     # Just HTTP for now. (We can add other protocols later.)
-# })
+application = ProtocolTypeRouter({
+    "http": AsgiHandler(),
+    "websocket": TokenAuthMiddlewareStack(
+        URLRouter(
+            chat_room.routing.websocket_urlpatterns
+        )
+    ),
+    # Just HTTP for now. (We can add other protocols later.)
+})
