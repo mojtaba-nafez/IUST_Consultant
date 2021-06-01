@@ -258,8 +258,8 @@ class ChannelSubscribers(APIView):
 
     def delete(self, request, channelId, format=None):
         try:
-            query = request.GET['username']  # string
-            # print("")
+            query = request.GET.get('username')  # string
+
             serializer = DeleteSubscriberSerializer(data=request.data)
             if serializer.is_valid():
                 username = serializer.data.get('username')

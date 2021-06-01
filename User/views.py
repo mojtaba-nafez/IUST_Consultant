@@ -180,7 +180,7 @@ class SearchConsultantsAPI(APIView, SearchConsultantPagination):
         try:
             from django.db.models import Q
             query = request.GET['query']  # string
-            print(query)
+            
             search_caregory = ''
             if request.GET.get('search_category') != None:
                 search_caregory = request.GET['search_category']

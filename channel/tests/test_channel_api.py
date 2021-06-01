@@ -5,6 +5,8 @@ from rest_framework import status
 from channel.models import Channel, Subscription
 from User.models import ConsultantProfile, UserProfile
 
+
+
 # SEARCH_CHANNEL = reverse()
 class PublicSearchForChannelTests(TestCase):
     """Test unauthenticated recipe API access"""
@@ -20,28 +22,29 @@ class PublicSearchForChannelTests(TestCase):
 
     def test_get_all_object_in_category(self):
         """ test when query in query parameter is set to '' => output is all object in category """
-        res = self.client.get('/channel/search-for-channel/?query=&search_category=Immigration')
+        res = self.client.get('/channel/search-for-channel/?query=&search_category=Immigration&page=1')
+        print(res.data['results'])
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['data']), 2)
-
+        self.assertEqual(len(res.data['results']), 2)
+    
     def test_get_all_object_in_query(self):
         """ test when category not exist  => output is all general search """
-        res = self.client.get('/channel/search-for-channel/?query=to')
+        res = self.client.get('/channel/search-for-channel/?query=to&page=1')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['data']), 2)
+        self.assertEqual(len(res.data['results']), 2)
         
 
     def test_check_search_in_channel_name(self):
         """ check search in name """
-        res = self.client.get('/channel/search-for-channel/?query=soul&search_category=Immigration')
+        res = self.client.get('/channel/search-for-channel/?query=soul&search_category=Immigration&page=1')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['data']), 1)
+        self.assertEqual(len(res.data['results']), 1)
     
     def test_check_search_in_channel_description(self):
         """ check search in description """
-        res = self.client.get('/channel/search-for-channel/?query=win&search_category=Psychology')
+        res = self.client.get('/channel/search-for-channel/?query=win&search_category=Psychology&page=1')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data['data']), 1)
+        self.assertEqual(len(res.data['results']), 1)
     
 class SuggestionChannelTests(TestCase):
     """Test unauthenticated recipe API access"""
