@@ -1,4 +1,4 @@
 release: python manage.py makemigrations
 release: python manage.py migrate
-web: daphne Consultant.asgi:application
+daphne -p 8001 Consultant.asgi:application
 
