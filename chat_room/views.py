@@ -82,6 +82,20 @@ class ChatMessageAPI(APIView):
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, ChatMessageId):
+        try:
+            chat_message = ChatMessage.objects.filter(id=ChatMessageId).select_related('sender')
+            if len(chat_message) == 0:
+                return Response({'error': 'شناسه پیام صحیح نیست'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                chat_message = chat_message[0]
+            if chat_message.sender.id != request.user.id:
+                return Response({"error": "شما دسترسی به این‌کار ندارید"}, status=status.HTTP_403_FORBIDDEN)
+            chat_message.delete()
+            return Response("پیام حذف شد", status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ConnectedUser(APIView):
     permission_classes = [IsAuthenticated]
