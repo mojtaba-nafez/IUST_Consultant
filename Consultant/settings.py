@@ -116,11 +116,12 @@ if 'DATABASE_URL' in os.environ:
     DATABASES = {
 	    'default': {
 	        'ENGINE': 'django.db.backends.postgresql',
-	        'NAME': 'd89bi8qv6dp50u',
-	        'HOST': 'ec2-54-155-254-112.eu-west-1.compute.amazonaws.com',
+	        'NAME': 'd19634o2prh09j',
+	        'HOST': 'ec2-54-167-152-185.compute-1.amazonaws.com',
 	        'PORT': 5432,
-	        'USER': 'jkwexnooimthsj',
-	        'PASSWORD': 'ea1c7fb62a2dabcde71ff883abcf44ffb3d04115f5894e6eec8fa720e197cf6d'
+	        'USER': 'mmdwwpvizfvozm',
+	        'PASSWORD': 'cfdf0ac2939d23b69f18747565aa2fc4597bdfefd48e016449d9dca2a23c7d39'
+'
      	}
     }
 # else:
