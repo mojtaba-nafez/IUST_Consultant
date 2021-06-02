@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "title": "Pargar Swagger"
   },
-  "host": "iust-se-consultant.herokuapp.com",
+  "host": "pargar.herokuapp.com",
   "tags": [
     {
       "name": "User",
@@ -2803,7 +2803,24 @@
         ],
         "responses": {
           "200": {
-            "description": "پیام ساخته شد"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "message_type": {
+                  "type": "string"
+                },
+                "message_file": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid input"
@@ -2925,6 +2942,42 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Direct"
+        ],
+        "summary": "delete direct message",
+        "operationId": "deleteDirectMessage",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ChatMessageId",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "description": "The deirect message ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           },
           "403": {
             "description": "Forbidden"
