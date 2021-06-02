@@ -82,9 +82,9 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'Consultant.wsgi.application'
+WSGI_APPLICATION = 'Consultant.wsgi.application'
 # Channels
-ASGI_APPLICATION = 'Consultant.asgi.application'
+ASGI_APPLICATION = 'Consultant.routing.application'
 
 #comunication for consumers(channels)
 CHANNEL_LAYERS = {
@@ -100,7 +100,7 @@ CHANNEL_LAYERS = {
         ### Method 2: Via local Redis
         # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
         # 'CONFIG': {
-        #      "hosts": [('127.0.0.1', 6379)],
+        #      "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
         # },
 
         ### Method 3: Via In-memory channel layer
