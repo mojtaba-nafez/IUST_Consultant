@@ -9,7 +9,7 @@ from django.core.files.base import File
 from User.models import UserProfile, ConsultantProfile
 from message.models import ChatMessage
 
-
+'''
 class PrivateChatMessageTest(TestCase):
     def setUp(self):
         self.url = "/chat/direct/message/"
@@ -162,6 +162,51 @@ class PrivateChatMessageTest(TestCase):
         response = self.client.delete(self.url + "1/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(json.loads(response.content),"پیام حذف شد")
+'''
 
 
+class PrivateDirectHistory(TestCase):
+    def setUp(self):
+        self.url = "/chat/direct/"
+        self.client = APIClient()
+        self.consultant = ConsultantProfile.objects.create(username="consultant", user_type='Immigration',phone_number="09184576125", first_name="hossein",last_name="masoudi", email="fdsadfs@gmailcom",password="123456",certificate="111")
+        self.normal_user = UserProfile.objects.create(username="normal_user", email="hamid@gmail.com",password="123456",phone_number="09176273746", first_name="hamid",last_name="azarbad")
+        self.forbidden_user = UserProfile.objects.create(username="forbidden", email="reza@gmail.com",password="123456",phone_number="09176273745", first_name="reza",last_name="rezaee")
+        consultant1=ConsultantProfile.objects.create(username="test",user_type='Immigration', phone_number="09184571254", first_name="hossein", last_name="masoudi", email="test1@gmailcom", password="qwertyu", certificate="111")
+        consultant2=ConsultantProfile.objects.create(username="alialipour", user_type='Psychology', phone_number="09184526798", first_name="ali", last_name="alipour", email="test2@gmailcom", password="bvcxz", certificate="3333")
+        consultant3=ConsultantProfile.objects.create(username="amin", user_type='Immigration', phone_number="09185762564", first_name="amini", last_name="masoudpour", email="amin@gmailcom", password="09876509ll", certificate="2586")
 
+
+        self.chat_message = ChatMessage.objects.create(text="Hello", message_type="t", message_file=None,
+                                                       sender=self.consultant, receiver=self.normal_user, )
+        self.chat_message = ChatMessage.objects.create(text="Hi", message_type="t", message_file=None,
+                                                       sender=self.consultant, receiver=consultant2 )
+        self.chat_message = ChatMessage.objects.create(text="Hi", message_type="t", message_file=None,
+                                                       sender=consultant2, receiver=consultant1, )
+        self.chat_message = ChatMessage.objects.create(text="Hi", message_type="t", message_file=None,
+                                                       sender=self.consultant, receiver=consultant3, )
+        self.chat_message = ChatMessage.objects.create(text="goodbye", message_type="t", message_file=None,
+                                                       sender=self.normal_user, receiver=consultant3, )
+        self.chat_message = ChatMessage.objects.create(text="Hi", message_type="t", message_file=None,
+                                                       sender=self.consultant, receiver=consultant1 )
+        self.chat_message = ChatMessage.objects.create(text="Hi", message_type="t", message_file=None,
+                                                       sender=self.consultant, receiver=self.forbidden_user)
+    def test_connected_user_success(self):
+        self.client.force_authenticate(self.consultant)
+        res = self.client.get(self.url + 'contact/')
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 5)
+
+    def test_authentication_(self):
+        res = self.client.get(self.url + 'contact/')
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_message_history(self):
+        self.client.force_authenticate(self.consultant)
+        res = self.client.get(self.url + 'history/5/?page=1')
+        self.assertEqual(res.status_code,status.HTTP_200_OK)
+        self.assertEqual(len(res.data['results']), 1)
+
+    def test_authentication_(self):
+        res = self.client.get(self.url + 'history/5/?page=1')
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
