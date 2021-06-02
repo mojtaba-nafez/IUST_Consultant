@@ -121,7 +121,6 @@ if 'DATABASE_URL' in os.environ:
 	        'PORT': 5432,
 	        'USER': 'mmdwwpvizfvozm',
 	        'PASSWORD': 'cfdf0ac2939d23b69f18747565aa2fc4597bdfefd48e016449d9dca2a23c7d39'
-'
      	}
     }
 # else:
