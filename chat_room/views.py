@@ -27,13 +27,13 @@ class ChatMessageAPI(APIView):
         try:
             chat_message_serializer = ChatMessageSerializer(data=request.data)
             if chat_message_serializer.is_valid():
-                receiver = BaseUser.objects.filter(id=chat_message_serializer.validated_data['receiver_id'])
+                receiver = BaseUser.objects.filter(username=chat_message_serializer.validated_data['receiver_username'])
                 if len(receiver) == 0:
                     return Response({"error": "شناسه دریافت‌کننده درست نیست"}, status=status.HTTP_400_BAD_REQUEST)
                 else:
                     receiver = receiver[0]
                 if len(ConsultantProfile.objects.filter(
-                        Q(id=request.user.id) | Q(id=chat_message_serializer.validated_data['receiver_id']))) == 0:
+                        Q(id=request.user.id) | Q(username=chat_message_serializer.validated_data['receiver_username']))) == 0:
                     return Response({"error": "یک سمت‌پیام باید مشاور باشد"}, status=status.HTTP_403_FORBIDDEN)
                 chat_message_serializer.validated_data['sender'] = request.user
                 chat_message_serializer.validated_data['receiver'] = receiver

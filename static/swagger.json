@@ -2796,9 +2796,9 @@
           },
           {
             "in": "formData",
-            "name": "receiver_id",
+            "name": "receiver_username",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
@@ -2881,9 +2881,9 @@
           },
           {
             "in": "formData",
-            "name": "receiver_id",
+            "name": "receiver_username",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
