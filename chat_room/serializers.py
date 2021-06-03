@@ -34,9 +34,10 @@ class ChatMessageSerializer(serializers.Serializer):
     message_type = serializers.ChoiceField(choices=message_choice, required=True, allow_null=False,
                                            allow_blank=False)
     message_file = serializers.FileField(required=False, allow_null=False, allow_empty_file=False)
-    receiver_id = serializers.IntegerField(required=True, allow_null=False, write_only=True)
+    receiver_username = serializers.CharField(required=True, allow_null=False, allow_blank=False, write_only=True)
 
     def create(self, validated_data):
+        del validated_data['receiver_username']
         return ChatMessage.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

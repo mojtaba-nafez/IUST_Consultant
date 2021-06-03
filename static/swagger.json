@@ -2796,14 +2796,31 @@
           },
           {
             "in": "formData",
-            "name": "receiver_id",
+            "name": "receiver_username",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "پیام ساخته شد"
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "message_type": {
+                  "type": "string"
+                },
+                "message_file": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "400": {
             "description": "Invalid input"
@@ -2864,9 +2881,9 @@
           },
           {
             "in": "formData",
-            "name": "receiver_id",
+            "name": "receiver_username",
             "required": true,
-            "type": "integer"
+            "type": "string"
           }
         ],
         "responses": {
