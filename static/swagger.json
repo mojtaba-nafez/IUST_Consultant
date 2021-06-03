@@ -2667,7 +2667,7 @@
         }
       }
     },
-    "/chat/direct/history/{UserID}/": {
+    "/chat/direct/history/{UserName}/": {
       "get": {
         "tags": [
           "Direct"
@@ -2688,9 +2688,9 @@
         "parameters": [
           {
             "in": "path",
-            "name": "UserID",
+            "name": "UserName",
             "description": "Direct of who?",
-            "type": "integer",
+            "type": "string",
             "required": true
           },
           {
@@ -2724,10 +2724,10 @@
                       "id": {
                         "type": "integer"
                       },
-                      "sender_id": {
+                      "sender": {
                         "type": "integer"
                       },
-                      "reciever_id": {
+                      "reciever": {
                         "type": "integer"
                       },
                       "text": {

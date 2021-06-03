@@ -4,10 +4,14 @@ from User.models import BaseUser
 from message.models import ChatMessage
 
 
+class ChannelMessageCreatorField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.username
+
 class DirectMessageSerializer(serializers.Serializer):
     id = serializers.IntegerField(allow_null=False, read_only=True)
-    sender_id = serializers.IntegerField(allow_null=False, read_only=True)
-    receiver_id = serializers.IntegerField(allow_null=False, read_only=True)
+    sender= ChannelMessageCreatorField(allow_null=False, allow_empty=False, read_only=True)
+    receiver =ChannelMessageCreatorField(allow_null=False, allow_empty=False, read_only=True)
     text = serializers.CharField(max_length=2000, required=False, allow_null=False, allow_blank=False,
                                  error_messages={'length': "طول متن حداکثر ۲۰۰ کاراکتر میتواند باشد"})
     message_choice = [
