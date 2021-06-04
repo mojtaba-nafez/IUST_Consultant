@@ -142,11 +142,12 @@ class ChannelMessagePagination(PageNumberPagination):
 class MessageHistory(APIView, ChannelMessagePagination):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, UserID, format=None):
+    def get(self, request, UserName, format=None):
         try:
             me = request.user
+            print(UserName)
             messages = ChatMessage.objects.filter(
-                (Q(sender=me) & Q(receiver__id=UserID)) | (Q(sender__id=UserID) & Q(receiver__id=me.id))).order_by(
+                (Q(sender=me) & Q(receiver__username=UserName)) | (Q(sender__username=UserName) & Q(receiver__id=me.id))).order_by(
                 '-date')
             page = self.paginate_queryset(messages, request, view=self)
             if page is not None:
