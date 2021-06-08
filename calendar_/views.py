@@ -64,7 +64,7 @@ class Reserve(APIView):
             consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID, start_date__gte=start_day,
                                                             start_date__lte=end_day)
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "+00:00"
-            
+
             obsolete_filled_time = consultant_time.exclude(start_date__gt=current_time).exclude(user=None)
             obsolete_empty_time = consultant_time.exclude(start_date__gt=current_time).filter(user=None)
 
@@ -285,3 +285,24 @@ class CancelConsultantTime(APIView):
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class CommentAndGradeAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, ConsultantTimeId):
+        try:
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related("user")
+            if len(consultant_time) == 0:
+                return Response({"error": "شناسه‌ی زمان‌مشاوره صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                consultant_time = consultant_time[0]
+            if consultant_time.user.id != request.user.id:
+                return Response({"error": "شما مجاز به این کار نیستید"}, status=status.HTTP_403_FORBIDDEN)
+            comment_and_grade_serializer = CommentAndRateSerializer(data=request.data)
+            if comment_and_grade_serializer.is_valid():
+                consultant_time.objects.update(user_comment=comment_and_grade_serializer.validated_data['user_comment'],
+                                               user_grade=comment_and_grade_serializer.validated_data['user_grade'])
+                return Response("", status=status.HTTP_200_OK)
+            else:
+                return Response({"error": comment_and_grade_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
