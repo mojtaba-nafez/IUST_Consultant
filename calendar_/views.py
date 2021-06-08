@@ -300,7 +300,8 @@ class CommentAndGradeAPI(APIView):
             comment_and_grade_serializer = CommentAndRateSerializer(data=request.data)
             if comment_and_grade_serializer.is_valid():
                 consultant_time.objects.update(user_comment=comment_and_grade_serializer.validated_data['user_comment'],
-                                               user_grade=comment_and_grade_serializer.validated_data['user_grade'])
+                                               user_grade=comment_and_grade_serializer.validated_data['user_grade'],
+                                               user_grade_date = timezone.now())
                 return Response("", status=status.HTTP_200_OK)
             else:
                 return Response({"error": comment_and_grade_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
