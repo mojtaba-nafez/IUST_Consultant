@@ -295,14 +295,15 @@ class CommentAndGradeAPI(APIView):
                 return Response({"error": "شناسه‌ی زمان‌مشاوره صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 consultant_time = consultant_time[0]
-            if consultant_time.user.id != request.user.id:
+            if consultant_time.user is None or consultant_time.user.id != request.user.id:
                 return Response({"error": "شما مجاز به این کار نیستید"}, status=status.HTTP_403_FORBIDDEN)
             comment_and_grade_serializer = CommentAndRateSerializer(data=request.data)
             if comment_and_grade_serializer.is_valid():
-                consultant_time.objects.update(user_comment=comment_and_grade_serializer.validated_data['user_comment'],
-                                               user_grade=comment_and_grade_serializer.validated_data['user_grade'],
-                                               user_grade_date = timezone.now())
-                return Response("", status=status.HTTP_200_OK)
+                consultant_time.user_grade = comment_and_grade_serializer.validated_data['user_grade']
+                consultant_time.user_comment = comment_and_grade_serializer.validated_data['user_comment']
+                consultant_time.user_grade_date = timezone.now()
+                consultant_time.save()
+                return Response("OK", status=status.HTTP_200_OK)
             else:
                 return Response({"error": comment_and_grade_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
