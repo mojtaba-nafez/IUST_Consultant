@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(blank=True, max_length=200, null=True)),
                 ('description', models.CharField(blank=True, max_length=500, null=True)),
                 ('cost', models.FloatField(default=0)),
-                ('user_grade', models.IntegerField(blank=True, null=True, validators=[django.core.validators.MaxValueValidator(100), django.core.validators.MinValueValidator(0)])),
+                ('user_grade', models.IntegerField(blank=True, null=True, validators=[django.core.validators.MaxValueValidator(5), django.core.validators.MinValueValidator(0)])),
                 ('user_comment', models.TextField(blank=True, max_length=500, null=True)),
                 ('consultant', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='User.ConsultantProfile')),
                 ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='user', to=settings.AUTH_USER_MODEL)),

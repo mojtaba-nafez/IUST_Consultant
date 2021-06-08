@@ -283,3 +283,5 @@ class CancelConsultantTime(APIView):
 
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

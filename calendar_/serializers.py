@@ -70,3 +70,9 @@ class ReserveConsultantTimeSerializer(serializers.Serializer):
                                         error_messages={
                                             "length": "توضیحات حداکثر 500 کاراکتر میتواند باشد",
                                         }, )
+
+
+class CommentAndRateSerializer(serializers.Serializer):
+    user_grade = serializers.IntegerField(required=True, allow_null=False, max_value=5, min_value=0)
+    user_comment = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=500,
+                                         error_messages={'length': "طول متن حداکثر 500 کاراکتر میتواند باشد"})
