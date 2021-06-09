@@ -1,4 +1,3 @@
-'''
 import os
 
 from django.test import TestCase
@@ -226,4 +225,3 @@ class PrivateDirectHistory(TestCase):
     def test_authentication_(self):
         res = self.client.get(self.url + 'history/test/?page=1')
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-'''
