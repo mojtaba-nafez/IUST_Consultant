@@ -218,10 +218,10 @@ class PrivateDirectHistory(TestCase):
 
     def test_get_message_history(self):
         self.client.force_authenticate(self.consultant)
-        res = self.client.get(self.url + 'history/5/?page=1')
+        res = self.client.get(self.url + 'history/test/?page=1')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data['results']), 1)
 
     def test_authentication_(self):
-        res = self.client.get(self.url + 'history/5/?page=1')
+        res = self.client.get(self.url + 'history/test/?page=1')
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

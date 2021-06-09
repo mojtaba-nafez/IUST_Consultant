@@ -71,7 +71,6 @@ class EditChannel(APIView):
     # permission_classes = [IsAuthenticated]
     def put(self, request, channelId, format=None):
         try:
-            print(request.data)
 
             serializer = EditChannelSerializer(data=request.data)
             if serializer.is_valid():
@@ -84,7 +83,6 @@ class EditChannel(APIView):
                                     status=status.HTTP_403_FORBIDDEN)
 
                 name = serializer.data.get('name')
-                print(serializer.data)
                 if name != None:
                     Channel.objects.filter(pk=channelId).update(name=name)
                 invite_link = serializer.data.get('invite_link')
@@ -252,8 +250,7 @@ class ChannelSubscribers(APIView):
 
     def delete(self, request, channelId, format=None):
         try:
-            query = request.GET['username']  # string
-            # print("")
+            query = request.GET.get('username')  # string
             serializer = DeleteSubscriberSerializer(data=request.data)
             if serializer.is_valid():
                 username = serializer.data.get('username')
@@ -323,7 +320,7 @@ class SearchChannel(APIView, SearchConsultantPagination):
     def get(self, request, format=None):
         try:
             from django.db.models import Q
-            query = request.GET['query']  # string
+            query = request.GET.get('query')  # string
             search_caregory = ''
             if request.GET.get('search_category') != None:
                 search_caregory = request.GET['search_category']
