@@ -15,4 +15,5 @@ RUN pip install -r requirements.txt
 
 # Collect static files
 RUN python manage.py collectstatic --no-input
-CMD gunicorn --bind 0.0.0.0:$PORT Consultant.wsgi
+CMD daphne Consultant.asgi:application --port $PORT --bind 0.0.0.0 -v3
+CMD python manage.py runworker --settings=Consultant.settings -v3
