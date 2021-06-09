@@ -25,7 +25,6 @@ docker-compose run --rm consultant sh -c "python manage.py makemigrations User c
 
 docker stop consultant_postgresql && docker rm consultant_postgresql && docker stop consultant && docker rm consultant
 
-yes
 add ('auth', '__latest__') to dependency of migrations 
 
 
