@@ -32,6 +32,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -82,8 +83,31 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Consultant.wsgi.application'
+# Channels
+ASGI_APPLICATION = 'Consultant.routing.application'
 
+#comunication for consumers(channels)
+CHANNEL_LAYERS = {
+    'default': {
+        ### Method 1: Via redis lab
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [
+        #       'redis://h:<password>;@<redis Endpoint>:<port>'
+        #     ],
+        # },
 
+        ### Method 2: Via local Redis
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #      "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        # },
+
+        ### Method 3: Via In-memory channel layer
+        ## Using this method.
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
@@ -92,11 +116,11 @@ if 'DATABASE_URL' in os.environ:
     DATABASES = {
 	    'default': {
 	        'ENGINE': 'django.db.backends.postgresql',
-	        'NAME': 'dfnb3vuup1kag3',
-	        'HOST': 'ec2-52-6-178-202.compute-1.amazonaws.com',
+	        'NAME': 'd19634o2prh09j',
+	        'HOST': 'ec2-54-167-152-185.compute-1.amazonaws.com',
 	        'PORT': 5432,
-	        'USER': 'yxfefqmmbxqxyn',
-	        'PASSWORD': '5b05f9b7010cc6e3d570a878f3038384e0eafe04afe0270ffd934941885dd16a'
+	        'USER': 'mmdwwpvizfvozm',
+	        'PASSWORD': 'cfdf0ac2939d23b69f18747565aa2fc4597bdfefd48e016449d9dca2a23c7d39'
      	}
     }
 elif 'test' in sys.argv or 'test_coverage' in sys.argv:
