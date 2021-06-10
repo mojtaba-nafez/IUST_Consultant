@@ -72,7 +72,19 @@ class ReserveConsultantTimeSerializer(serializers.Serializer):
                                         }, )
 
 
+class ReservatorField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "username": value.username,
+            "avatar": value.avatart.url if value.avatart is not None else None,
+        }
+
+
 class CommentAndRateSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True, allow_null=False)
+    user_grade_date = serializers.DateTimeField(read_only=True, allow_null=False)
+    user = ReservatorField(read_only=True, allow_null=True, allow_empty=True)
     user_grade = serializers.IntegerField(required=True, allow_null=False, max_value=5, min_value=0)
     user_comment = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=500,
                                          error_messages={'length': "طول متن حداکثر 500 کاراکتر میتواند باشد"})
