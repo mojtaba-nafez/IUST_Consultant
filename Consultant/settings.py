@@ -33,6 +33,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
     'channels',
+    'djangosecure',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +43,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'corsheaders',
-    'djangosecure',
     'User',
     'calendar_',
     'channel',
@@ -65,11 +65,11 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
-# MIDDLEWARE_CLASSES = (
-#     'djangosecure.middleware.SecurityMiddleware'
-#)
-#SECURE_SSL_REDIRECT = True
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+MIDDLEWARE_CLASSES = (
+     'djangosecure.middleware.SecurityMiddleware'
+)
+SECURE_SSL_REDIRECT = True
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 ROOT_URLCONF = 'Consultant.urls'
