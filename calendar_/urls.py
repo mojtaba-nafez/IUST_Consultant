@@ -7,7 +7,6 @@ urlpatterns = [
     path('consultant-time/<int:ConsultantTimeId>/', views.ConsultantTimeAPI.as_view(), name='ud_consultant_time'),
     path('consultant-time/cancel/<int:ConsultantTimeId>/', views.CancelConsultantTime.as_view(), name='cancel_consultant_time'),
     path('consultant-time/comment/<int:ConsultantTimeId>/', views.CommentAndGradeAPI.as_view(), name='create comment'),
-    path('consultant-time/comment/<str:ConsultantId>/', views.CancelConsultantTime.as_view(), name='get consultant comments'),
     path('reserve/<int:ConsultantID>/', views.Reserve.as_view(), name='consultant_time'),
 ]
 

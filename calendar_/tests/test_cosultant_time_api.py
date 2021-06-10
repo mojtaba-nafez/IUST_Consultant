@@ -548,7 +548,8 @@ class PrivateCancelConsultantTimeTest(TestCase):
 
 class PrivateCommentAndGradeTest(TestCase):
     def setUp(self):
-        self.url = '/calendar/consultant-time/comment/'
+        self.post_url = '/calendar/consultant-time/comment/'
+        self.get_url = '/consultant/comment/'
         self.client = APIClient()
         self.consultant = ConsultantProfile.objects.create(username="consultant", user_type='Immigration',
                                                            phone_number="09184576125", first_name="hossein",
@@ -577,26 +578,34 @@ class PrivateCommentAndGradeTest(TestCase):
                                                                       end_date=timezone.localize(
                                                                           datetime.datetime(2027, 1, 1, 19,
                                                                                             30)))
+        # add 20 consultant times with comment and grade
+        for count in range(20):
+            ConsultantTime.objects.create(consultant=self.consultant, user=self.reservatore, title="title",
+                                          start_date=timezone.localize(datetime.datetime(2030 + count, 1, 1, 18, 30)),
+                                          end_date=timezone.localize(datetime.datetime(2030 + count, 1, 1, 19, 30)),
+                                          user_grade=count % 5, user_comment="مشاوره‌ی خوبی بود", )
 
     def test_un_authorize_client(self):
-        response = self.client.post(self.url + "1/")
+        response = self.client.post(self.post_url + "1/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        response = self.client.get(self.get_url + "1/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_invalid_consultant_time_id_post_request(self):
         self.client.force_authenticate(self.reservatore)
-        response = self.client.post(self.url + "100/")
+        response = self.client.post(self.post_url + "100/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), {"error": "شناسه‌ی زمان‌مشاوره صحیح نیست"})
 
     def test_un_reserve_consultant_time_post_request(self):
         self.client.force_authenticate(self.reservatore)
-        response = self.client.post(self.url + self.un_reserved_consultant_time.id.__str__() + "/")
+        response = self.client.post(self.post_url + self.un_reserved_consultant_time.id.__str__() + "/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(json.loads(response.content), {"error": "شما مجاز به این کار نیستید"})
 
     def test_not_reservator_consultant_time_post_request(self):
         self.client.force_authenticate(self.consultant)
-        response = self.client.post(self.url + self.reserved_consultant_time.id.__str__() + "/")
+        response = self.client.post(self.post_url + self.reserved_consultant_time.id.__str__() + "/")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(json.loads(response.content), {"error": "شما مجاز به این کار نیستید"})
 
@@ -606,9 +615,21 @@ class PrivateCommentAndGradeTest(TestCase):
             "user_grade": 5,
             "user_comment": "جلسه‌ی خوبی بود"
         }
-        response = self.client.post(self.url + self.reserved_consultant_time.id.__str__() + "/", payload)
+        response = self.client.post(self.post_url + self.reserved_consultant_time.id.__str__() + "/", payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         consultant_time = ConsultantTime.objects.filter(id=self.reserved_consultant_time.id)[0]
         self.assertEqual(consultant_time.user_grade, 5)
         self.assertEqual(consultant_time.user_comment, "جلسه‌ی خوبی بود")
         self.assertIsNotNone(consultant_time.user_grade_date)
+
+    def test_invalid_consultant_id_get_request(self):
+        self.client.force_authenticate(self.reservatore)
+        response = self.client.get(self.get_url + "10000" + "/?page=1")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شناسه‌ی مشاور صحیح نیست"})
+
+    def test_get_comments_successfully(self):
+        self.client.force_authenticate(self.reservatore)
+        response = self.client.get(self.get_url + self.consultant.id.__str__() + "/?page=1")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(json.loads(response.content)['results']), 10)
