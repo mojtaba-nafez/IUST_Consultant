@@ -77,6 +77,8 @@ class ReservatorField(serializers.RelatedField):
         return {
             "id": value.id,
             "username": value.username,
+            "first_name": value.first_name,
+            "last_name": value.last_name,
             "avatar": value.avatar.url if value.avatar else None,
         }
 
