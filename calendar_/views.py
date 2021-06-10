@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.utils.datastructures import MultiValueDictKeyError
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import APIView
 from rest_framework.response import Response
@@ -64,7 +65,7 @@ class Reserve(APIView):
             consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID, start_date__gte=start_day,
                                                             start_date__lte=end_day)
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "+00:00"
-            
+
             obsolete_filled_time = consultant_time.exclude(start_date__gt=current_time).exclude(user=None)
             obsolete_empty_time = consultant_time.exclude(start_date__gt=current_time).filter(user=None)
 
@@ -281,5 +282,51 @@ class CancelConsultantTime(APIView):
                 consultant_time.save()
                 return Response({}, status=status.HTTP_200_OK)
 
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CommentAndGradPagination(PageNumberPagination):
+    page_size = 10
+    page_query_param = "page"
+
+
+class CommentAndGradeAPI(APIView, CommentAndGradPagination):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, ConsultantTimeId):
+        try:
+            consultant_time = ConsultantTime.objects.filter(id=ConsultantTimeId).select_related("user")
+            if len(consultant_time) == 0:
+                return Response({"error": "شناسه‌ی زمان‌مشاوره صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                consultant_time = consultant_time[0]
+            if consultant_time.user is None or consultant_time.user.id != request.user.id:
+                return Response({"error": "شما مجاز به این کار نیستید"}, status=status.HTTP_403_FORBIDDEN)
+            comment_and_grade_serializer = CommentAndRateSerializer(data=request.data)
+            if comment_and_grade_serializer.is_valid():
+                consultant_time.user_grade = comment_and_grade_serializer.validated_data['user_grade']
+                consultant_time.user_comment = comment_and_grade_serializer.validated_data['user_comment']
+                consultant_time.user_grade_date = timezone.now()
+                consultant_time.save()
+                return Response("OK", status=status.HTTP_200_OK)
+            else:
+                return Response({"error": comment_and_grade_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request, ConsultantId):
+        try:
+            if len(ConsultantProfile.objects.filter(id=ConsultantId)) == 0:
+                return Response({"error": "شناسه‌ی مشاور صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            consultant_times = ConsultantTime.objects.filter(consultant__id=ConsultantId,
+                                                             user_grade__isnull=False).order_by('-user_grade_date')
+            page = self.paginate_queryset(consultant_times, request, view=self)
+            if page is not None:
+                consultant_time_serializer = self.get_paginated_response(CommentAndRateSerializer(page,
+                                                                                          many=True).data)
+            else:
+                consultant_time_serializer = CommentAndRateSerializer(consultant_times, many=True)
+            return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "title": "Pargar Swagger"
   },
-  "host": "pargar.herokuapp.com",
+  "host": "consultant-iust.herokuapp.com",
   "tags": [
     {
       "name": "User",
@@ -46,6 +46,10 @@
     {
       "name": "Direct",
       "description": "Everything about Direct can be implement in api"
+    },
+    {
+      "name": "Comment",
+      "description": "Everything about Comment"
     }
   ],
   "schemes": [
@@ -2978,6 +2982,142 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/calendar/consultant-time/comment/{ConsultantTimeId}/": {
+      "post": {
+        "tags": [
+          "Comment"
+        ],
+        "summary": "create a new comment",
+        "operationId": "createComment",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantTimeId",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Normal user fields",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "user_grade"
+              ],
+              "properties": {
+                "user_grade": {
+                  "type": "integer",
+                  "maximum": 5,
+                  "minimum": 0,
+                  "description": "Between 0 and 5"
+                },
+                "user_comment": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/consultant/comment/{ConsultatntId}": {
+      "get": {
+        "tags": [
+          "Comment"
+        ],
+        "summary": "get consultant comments",
+        "operationId": "getComments",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultatntId",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "description": "The deirect message ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "user_grade_date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "user": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "first_name": {
+                      "type": "string"
+                    },
+                    "last_name": {
+                      "type": "string"
+                    },
+                    "avatar": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "user_grade": {
+                  "type": "integer"
+                },
+                "user_comment": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "403": {
             "description": "Forbidden"

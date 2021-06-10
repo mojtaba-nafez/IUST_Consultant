@@ -70,3 +70,23 @@ class ReserveConsultantTimeSerializer(serializers.Serializer):
                                         error_messages={
                                             "length": "توضیحات حداکثر 500 کاراکتر میتواند باشد",
                                         }, )
+
+
+class ReservatorField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "username": value.username,
+            "first_name": value.first_name,
+            "last_name": value.last_name,
+            "avatar": value.avatar.url if value.avatar else None,
+        }
+
+
+class CommentAndRateSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True, allow_null=False)
+    user_grade_date = serializers.DateTimeField(read_only=True, allow_null=False)
+    user = ReservatorField(read_only=True, allow_null=True, allow_empty=True)
+    user_grade = serializers.IntegerField(required=True, allow_null=False, max_value=5, min_value=0)
+    user_comment = serializers.CharField(required=False, allow_null=True, allow_blank=True, max_length=500,
+                                         error_messages={'length': "طول متن حداکثر 500 کاراکتر میتواند باشد"})

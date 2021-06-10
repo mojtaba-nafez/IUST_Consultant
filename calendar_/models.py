@@ -12,5 +12,6 @@ class ConsultantTime(models.Model):
     title = models.CharField(max_length=200, null=True, blank=True)
     description = models.CharField(max_length=500, null=True, blank=True)
     cost = models.FloatField(default=0)
-    user_grade = models.IntegerField(validators=[MaxValueValidator(100), MinValueValidator(0)], null=True, blank=True)
+    user_grade = models.IntegerField(validators=[MaxValueValidator(5), MinValueValidator(0)], null=True, blank=True)
+    user_grade_date = models.DateTimeField(auto_now=False, auto_now_add=False, null=True, blank=True)
     user_comment = models.TextField(max_length=500, null=True, blank=True)
