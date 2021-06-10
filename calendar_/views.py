@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.utils.datastructures import MultiValueDictKeyError
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import APIView
 from rest_framework.response import Response
@@ -285,7 +286,12 @@ class CancelConsultantTime(APIView):
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class CommentAndGradeAPI(APIView):
+class CommentAndGradPagination(PageNumberPagination):
+    page_size = 10
+    page_query_param = "page"
+
+
+class CommentAndGradeAPI(APIView, CommentAndGradPagination):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, ConsultantTimeId):
@@ -306,5 +312,21 @@ class CommentAndGradeAPI(APIView):
                 return Response("OK", status=status.HTTP_200_OK)
             else:
                 return Response({"error": comment_and_grade_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as server_error:
+            return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request, ConsultantId):
+        try:
+            if len(ConsultantProfile.objects.filter(id=ConsultantId)) == 0:
+                return Response({"error": "شناسه‌ی مشاور صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            consultant_times = ConsultantTime.objects.filter(consultant__id=ConsultantId,
+                                                             user_grade__isnull=False).order_by('-user_grade_date')
+            page = self.paginate_queryset(consultant_times, request, view=self)
+            if page is not None:
+                consultant_time_serializer = self.get_paginated_response(CommentAndRateSerializer(page,
+                                                                                          many=True).data)
+            else:
+                consultant_time_serializer = CommentAndRateSerializer(consultant_times, many=True)
+            return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
