@@ -20,6 +20,7 @@ from User import views as user_view
 from Consultant import views as consultant_view
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from chat_room import views as chat_views
+from video_chat.views import ChatVideoAPI
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,6 +39,7 @@ urlpatterns = [
     path('chat/', include('chat_room.urls'), name='chat_room'),
     #path('chat/', chat_views.index, name='index'),
     #path('chat/<str:room_name>/', chat_views.room, name='index'),
+    #path('test/', ChatVideoAPI.as_view(), name='index'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
