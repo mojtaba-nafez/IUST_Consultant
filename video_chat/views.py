@@ -49,7 +49,7 @@ def create_whereby_room(consultant_time):
 
 
 class ChatVideoAPI(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, ConsultantTimeId):
         try:
