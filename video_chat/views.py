@@ -27,11 +27,11 @@ def check_video_room_conditions(consultant_time, request):
         return False, Response({"error": "دسترسی به این زمان‌مشاوره را ندارید"}, status=status.HTTP_403_FORBIDDEN)
     if consultant_time.user.id != request.user.id and consultant_time.consultant.id != request.user.id:
         return False, Response({"error": "دسترسی به این زمان‌مشاوره را ندارید"}, status=status.HTTP_403_FORBIDDEN)
-    if consultant_time.end_date > timezone.now():
-        return False, Response({"error": "زمان مشاوره به‌اتمام رسیده‌است"}, status=status.HTTP_403_FORBIDDEN)
-    if consultant_time.start_date < timezone.now():
-        return False, Response({"error": "زمان مشاوره فرانرسیده‌است"}, status=status.HTTP_403_FORBIDDEN)
-    return True
+    if consultant_time.end_date < timezone.now():
+        return False, Response({"error": "زمان مشاوره به‌اتمام رسیده‌است"}, status=status.HTTP_400_BAD_REQUEST)
+    if consultant_time.start_date > timezone.now():
+        return False, Response({"error": "زمان مشاوره فرانرسیده‌است"}, status=status.HTTP_400_BAD_REQUEST)
+    return True, None
 
 
 def create_whereby_room(consultant_time):
@@ -64,7 +64,7 @@ class ChatVideoAPI(APIView):
                 whereby_response = create_whereby_room(consultant_time)
                 whereby_response_data = json.loads(whereby_response.text)
                 if whereby_response.status_code == status.HTTP_201_CREATED:
-                    consultant_time.whereby_meeting_id = whereby_response_data["meetingId"]
+                    consultant_time.whereby_meeting_id = int(whereby_response_data["meetingId"])
                     consultant_time.whereby_room_url = whereby_response_data['roomUrl']
                     consultant_time.whereby_host_room_url = whereby_response_data['hostRoomUrl']
                     consultant_time.save()

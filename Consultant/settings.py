@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'chat_room',
     'message',
     'request',
+    'video_chat',
     'cloudinary',
     'cloudinary_storage',
 ]
