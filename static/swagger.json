@@ -50,6 +50,10 @@
     {
       "name": "Comment",
       "description": "Everything about Comment"
+    },
+    {
+      "name": "Video-Chat",
+      "description": "Everything about vidoe-chat"
     }
   ],
   "schemes": [
@@ -3121,6 +3125,65 @@
           },
           "403": {
             "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/video-chat/consultant-time/start/{ConsultantTimeId}/": {
+      "post": {
+        "tags": [
+          "Video-Chat"
+        ],
+        "summary": "Request for start video chat",
+        "operationId": "startVideoChat",
+        "security": [
+          {
+            "Token": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ConsultantTimeId",
+            "required": true,
+            "type": "integer",
+            "minimum": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "meetingId": {
+                  "type": "integer"
+                },
+                "roomUrl": {
+                  "type": "string"
+                },
+                "hostRoomUrl": {
+                  "type": "string"
+                },
+                "startDate": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "endDate": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
           }
         }
       }
