@@ -35,6 +35,7 @@ urlpatterns = [
     path('swagger/', user_view.SwaggerUI.as_view(), name='swagger-ui'),
     path('swagger/', user_view.SwaggerUI.as_view(), name='swagger-ui'),
     path('calendar/', include('calendar_.urls')),
+    path('video-chat/', include('video_chat.urls')),
     path('fakeData/', consultant_view.InsertFakeData.as_view(), name='insert-fake-data'),
     path('chat/', include('chat_room.urls'), name='chat_room'),
     #path('chat/', chat_views.index, name='index'),
