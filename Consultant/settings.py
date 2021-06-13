@@ -117,11 +117,11 @@ if 'DATABASE_URL' in os.environ:
     DATABASES = {
 	    'default': {
 	        'ENGINE': 'django.db.backends.postgresql',
-	        'NAME': 'd19634o2prh09j',
-	        'HOST': 'ec2-54-167-152-185.compute-1.amazonaws.com',
+	        'NAME': 'dv5ba49esfand',
+	        'HOST': 'ec2-54-160-7-200.compute-1.amazonaws.com',
 	        'PORT': 5432,
-	        'USER': 'mmdwwpvizfvozm',
-	        'PASSWORD': 'cfdf0ac2939d23b69f18747565aa2fc4597bdfefd48e016449d9dca2a23c7d39'
+	        'USER': 'qjxaoqhdcxxctw',
+	        'PASSWORD': '85e5a378a312881a0730e35238836320b0551aed82ec59078e0f9ff00617e15d'
      	}
     }
 elif 'test' in sys.argv or 'test_coverage' in sys.argv:
@@ -135,11 +135,11 @@ else:
     DATABASES = {
 	    'default': {
 	        'ENGINE': 'django.db.backends.postgresql',
-	        'NAME': 'd19634o2prh09j',
-	        'HOST': 'ec2-54-167-152-185.compute-1.amazonaws.com',
+	        'NAME': 'dv5ba49esfand',
+	        'HOST': 'ec2-54-160-7-200.compute-1.amazonaws.com',
 	        'PORT': 5432,
-	        'USER': 'mmdwwpvizfvozm',
-	        'PASSWORD': 'cfdf0ac2939d23b69f18747565aa2fc4597bdfefd48e016449d9dca2a23c7d39'
+	        'USER': 'qjxaoqhdcxxctw',
+	        'PASSWORD': '85e5a378a312881a0730e35238836320b0551aed82ec59078e0f9ff00617e15d'
      	}
     }
 # else:
