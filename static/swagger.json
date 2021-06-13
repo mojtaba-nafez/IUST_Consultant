@@ -408,6 +408,12 @@
                       },
                       "user_type": {
                         "type": "string"
+                      },
+                      "count_of_all_comments": {
+                        "type": "integer"
+                      },
+                      "satisfaction_percentage": {
+                        "type": "integer"
                       }
                     }
                   }
@@ -3053,7 +3059,7 @@
         }
       }
     },
-    "/consultant/comment/{ConsultatntId}": {
+    "/consultant/comment/{ConsultatntUsername}": {
       "get": {
         "tags": [
           "Comment"
@@ -3074,11 +3080,9 @@
         "parameters": [
           {
             "in": "path",
-            "name": "ConsultatntId",
+            "name": "ConsultatntUsername",
             "required": true,
-            "type": "integer",
-            "minimum": 1,
-            "description": "The deirect message ID"
+            "type": "string"
           }
         ],
         "responses": {
@@ -3119,6 +3123,12 @@
                 },
                 "user_comment": {
                   "type": "string"
+                },
+                "count_of_all_comments": {
+                  "type": "integer"
+                },
+                "satisfaction_percentage": {
+                  "type": "integer"
                 }
               }
             }
