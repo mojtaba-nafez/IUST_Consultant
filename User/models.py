@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from rest_framework import serializers
@@ -35,8 +36,10 @@ class BaseUser(AbstractUser):
         ('Psychology', 'Psychology'),
         ('Immigration', 'Immigration'),
         ('AcademicAdvice', 'AcademicAdvice')
-    ]      
-    user_type = models.CharField(null=False, blank=False, choices=user_type_choices, default="normal_user", max_length=32)
+    ]
+    user_type = models.CharField(null=False, blank=False, choices=user_type_choices, default="normal_user",
+                                 max_length=32)
+
 
 class UserProfile(BaseUser):
     private_profile = models.BooleanField(default=False, null=False, blank=False)
@@ -52,6 +55,8 @@ class ConsultantProfile(BaseUser):
         UserProfile,
     )
     certificate = models.FileField(upload_to="files/lawyers/certificate", null=True, blank=True)
+    count_of_all_comments = models.IntegerField(default=0, validators=[MinValueValidator(0)])
+    satisfaction_percentage = models.IntegerField(default=0,validators=[MinValueValidator(0), MaxValueValidator(100)])
 
     class Meta:
         verbose_name_plural = 'ConsultantProfile'

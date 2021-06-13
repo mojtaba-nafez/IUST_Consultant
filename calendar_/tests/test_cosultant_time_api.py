@@ -621,6 +621,8 @@ class PrivateCommentAndGradeTest(TestCase):
         self.assertEqual(consultant_time.user_grade, 5)
         self.assertEqual(consultant_time.user_comment, "جلسه‌ی خوبی بود")
         self.assertIsNotNone(consultant_time.user_grade_date)
+        self.assertEqual(consultant_time.consultant.count_of_all_comments, 1)
+        self.assertEqual(consultant_time.consultant.satisfaction_percentage, 100)
 
     def test_invalid_consultant_id_get_request(self):
         self.client.force_authenticate(self.reservatore)
@@ -630,6 +632,6 @@ class PrivateCommentAndGradeTest(TestCase):
 
     def test_get_comments_successfully(self):
         self.client.force_authenticate(self.reservatore)
-        response = self.client.get(self.get_url + self.consultant.id.__str__() + "/?page=1")
+        response = self.client.get(self.get_url + self.consultant.username + "/?page=1")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(json.loads(response.content)['results']), 10)

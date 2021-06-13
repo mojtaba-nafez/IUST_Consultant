@@ -178,7 +178,8 @@ class AnotherUserProfileAPI(APIView):
             else:
                 user = UserProfile.objects.filter(username=username)
                 if len(user) == 0:
-                    return Response({"error": "کاربری با این نام‌کاربری موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": "کاربری با این نام‌کاربری موجود نیست"},
+                                    status=status.HTTP_400_BAD_REQUEST)
                 else:
                     user_serializer = UserProfileSerializer(user[0])
             user_profile = user_serializer.data
@@ -188,12 +189,15 @@ class AnotherUserProfileAPI(APIView):
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class SearchConsultantPagination(PageNumberPagination):
     page_size = 12
     page_query_param = 'page'
 
+
 class SearchConsultantsAPI(APIView, SearchConsultantPagination):
     permission_classes = []
+
     def get(self, request, format=None):
         try:
             from django.db.models import Q
@@ -208,7 +212,7 @@ class SearchConsultantsAPI(APIView, SearchConsultantPagination):
                 page = self.paginate_queryset(consultant, request, view=self)
                 if page is not None:
                     consultant_serializer = self.get_paginated_response(SearchConsultantSerializer(page,
-                                                                                          many=True).data)
+                                                                                                   many=True).data)
                 else:
                     consultant_serializer = SearchConsultantSerializer(consultant, many=True)
             else:
@@ -217,9 +221,11 @@ class SearchConsultantsAPI(APIView, SearchConsultantPagination):
                 page = self.paginate_queryset(consultant, request, view=self)
                 if page is not None:
                     consultant_serializer = self.get_paginated_response(SearchConsultantSerializer(page,
-                                                                                          many=True).data)
+                                                                                                   many=True).data)
                 else:
                     consultant_serializer = SearchConsultantSerializer(consultant, many=True)
+            consultant_serializer.data['count_of_all_comments'] = consultant.count_of_all_comments
+            consultant_serializer.data['satisfaction_percentage'] = consultant.satisfaction_percentage
             return Response(consultant_serializer.data, status=status.HTTP_200_OK)
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},

@@ -286,6 +286,25 @@ class CancelConsultantTime(APIView):
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+def update_consultant_time(consultant_time, user_grade, user_comment):
+    consultant_time.user_grade = user_grade
+    consultant_time.user_comment = user_comment
+    consultant_time.user_grade_date = timezone.now()
+    consultant_time.save()
+
+
+def update_consultant_satisfaction(consultant, user_grade):
+    old_consultant_satisfaction = (consultant.satisfaction_percentage / 20) * consultant.count_of_all_comments
+    new_consultant_satisfaction = old_consultant_satisfaction + user_grade
+    consultant.count_of_all_comments += 1
+    new_consultant_satisfaction_percentage = int(new_consultant_satisfaction / consultant.count_of_all_comments * 20)
+    consultant.satisfaction_percentage = new_consultant_satisfaction_percentage
+    ConsultantProfile.objects.filter(id=consultant.id).update(
+        count_of_all_comments = consultant.count_of_all_comments,
+        satisfaction_percentage = consultant.satisfaction_percentage
+    )
+
+
 class CommentAndGradPagination(PageNumberPagination):
     page_size = 10
     page_query_param = "page"
@@ -305,28 +324,32 @@ class CommentAndGradeAPI(APIView, CommentAndGradPagination):
                 return Response({"error": "شما مجاز به این کار نیستید"}, status=status.HTTP_403_FORBIDDEN)
             comment_and_grade_serializer = CommentAndRateSerializer(data=request.data)
             if comment_and_grade_serializer.is_valid():
-                consultant_time.user_grade = comment_and_grade_serializer.validated_data['user_grade']
-                consultant_time.user_comment = comment_and_grade_serializer.validated_data['user_comment']
-                consultant_time.user_grade_date = timezone.now()
-                consultant_time.save()
+                update_consultant_time(consultant_time, comment_and_grade_serializer.validated_data['user_grade'],
+                                       comment_and_grade_serializer.validated_data['user_comment'])
+                update_consultant_satisfaction(consultant_time.consultant, int(consultant_time.user_grade))
                 return Response("OK", status=status.HTTP_200_OK)
             else:
                 return Response({"error": comment_and_grade_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def get(self, request, ConsultantId):
+    def get(self, request, ConsultantUsername):
         try:
-            if len(ConsultantProfile.objects.filter(id=ConsultantId)) == 0:
+            consultant = ConsultantProfile.objects.filter(username=ConsultantUsername)
+            if len(consultant) == 0:
                 return Response({"error": "شناسه‌ی مشاور صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
-            consultant_times = ConsultantTime.objects.filter(consultant__id=ConsultantId,
+            else:
+                consultant = consultant[0]
+            consultant_times = ConsultantTime.objects.filter(consultant__username=ConsultantUsername,
                                                              user_grade__isnull=False).order_by('-user_grade_date')
             page = self.paginate_queryset(consultant_times, request, view=self)
             if page is not None:
-                consultant_time_serializer = self.get_paginated_response(CommentAndRateSerializer(page,
-                                                                                          many=True).data)
+                consultant_times_serializer = self.get_paginated_response(CommentAndRateSerializer(page,
+                                                                                                  many=True).data)
             else:
-                consultant_time_serializer = CommentAndRateSerializer(consultant_times, many=True)
-            return Response(consultant_time_serializer.data, status=status.HTTP_200_OK)
+                consultant_times_serializer = CommentAndRateSerializer(consultant_times, many=True)
+            consultant_times_serializer.data['count_of_all_comments'] = consultant.count_of_all_comments
+            consultant_times_serializer.data['satisfaction_percentage'] = consultant.satisfaction_percentage
+            return Response(consultant_times_serializer.data, status=status.HTTP_200_OK)
         except Exception as server_error:
             return Response({"error": server_error.__str__()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
