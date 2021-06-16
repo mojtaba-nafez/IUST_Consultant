@@ -78,3 +78,5 @@ class SearchConsultantSerializer(BaseUserSerializer):
         ('AcademicAdvice', 'AcademicAdvice')
     )
     user_type = serializers.ChoiceField(choices=consultant_types, required=True)
+    count_of_all_comments = serializers.IntegerField(default=0, validators=[MinValueValidator(0)])
+    satisfaction_percentage = serializers.IntegerField(default=0,validators=[MinValueValidator(0), MaxValueValidator(100)])

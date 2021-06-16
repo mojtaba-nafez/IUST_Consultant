@@ -224,8 +224,7 @@ class SearchConsultantsAPI(APIView, SearchConsultantPagination):
                                                                                                    many=True).data)
                 else:
                     consultant_serializer = SearchConsultantSerializer(consultant, many=True)
-            consultant_serializer.data['count_of_all_comments'] = consultant.count_of_all_comments
-            consultant_serializer.data['satisfaction_percentage'] = consultant.satisfaction_percentage
+           
             return Response(consultant_serializer.data, status=status.HTTP_200_OK)
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
