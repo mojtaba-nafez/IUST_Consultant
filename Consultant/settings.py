@@ -133,15 +133,23 @@ elif 'test' in sys.argv or 'test_coverage' in sys.argv:
     }
 else:
     DATABASES = {
-	    'default': {
-	        'ENGINE': 'django.db.backends.postgresql',
-	        'NAME': 'dv5ba49esfand',
-	        'HOST': 'ec2-54-160-7-200.compute-1.amazonaws.com',
-	        'PORT': 5432,
-	        'USER': 'qjxaoqhdcxxctw',
-	        'PASSWORD': '85e5a378a312881a0730e35238836320b0551aed82ec59078e0f9ff00617e15d'
-     	}
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
+    '''
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'consultant_postgresql',
+        'PORT': '5432',
+        }
+    }
+    '''
 # else:
 #     DATABASES = {
 #         'default': {
@@ -153,14 +161,7 @@ else:
 #             'PORT': '3306',
 #         }
 #     }
-    '''
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
-    '''
+
 
 
 

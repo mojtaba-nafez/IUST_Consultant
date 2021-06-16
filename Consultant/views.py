@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from channel.models import Channel, Subscription
 from User.models import ConsultantProfile, UserProfile
 from message.models import *
+from django.core.files.base import File
+import os
 
 
 class InsertFakeData(APIView):
@@ -279,7 +281,7 @@ class InsertFakeData(APIView):
                 try:
                     user = UserProfile.objects.create(username=user_user_name[i], email=user_email[i],
                                                       password=user_password[i], phone_number=user_phone_number[i],
-                                                      first_name=user_first_name[i], last_name=user_last_name[i])
+                                                      first_name=user_first_name[i], last_name=user_last_name[i], avatar=File(open(os.path.dirname(__file__)+'/files/user/'+ str((i+1)) +'.jpeg', 'rb')))
                     users.append(user)
                     print('user ' + user_user_name[i] + ' created')
                 except:
@@ -295,11 +297,11 @@ class InsertFakeData(APIView):
                                                                   first_name=consultant_first_name[j],
                                                                   last_name=consultant_last_name[j],
                                                                   email=consultant_email[j],
-                                                                  password=consultant_password[j], certificate="111")
+                                                                  password=consultant_password[j], certificate="111", avatar=File(open(os.path.dirname(__file__)+'/files/channel_consultant/'+ str(j+1) +'.png', 'rb')))
                     consultants.append(consultant)
                     print('consultant ' + consultant_username[j] + ' created')
                     channel = Channel.objects.create(name=channel_name[j], description=description[j],
-                                                     invite_link=invite_link[j], consultant=consultant)
+                                                     invite_link=invite_link[j], consultant=consultant, avatar=File(open(os.path.dirname(__file__)+'/files/channel_consultant/'+ str(j+1) +'.png', 'rb')))
                     print('channel ' + channel_name[j] + ' created')
                     channels.append(channel)
                     for k in range(len(message_text)):
