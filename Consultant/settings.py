@@ -227,3 +227,32 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = (
    os.path.join(BASE_DIR, 'static'),
 )
+
+
+
+# email stuff
+'''
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAI_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER')
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'consultant.iust.se@gmail.com'
+EMAI_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'consultant.iust.se@gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_PASSWORD = 'poiuytrewq0987654321'
+'''
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'consultant.iust.se@gmail.com'
+EMAIL_HOST_PASSWORD = 'poiuytrewq0987654321' 

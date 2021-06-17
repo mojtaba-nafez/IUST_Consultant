@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.mail import EmailMessage
 
 from User.models import UserProfile
 from .serializers import *
@@ -46,6 +47,16 @@ class Reserve(APIView):
                                                                                title=serializer.data.get('title'),
                                                                                description=serializer.data.get(
                                                                                    'description'))
+                email_subject="زمان مشاوره"
+                temp_time=consultant_time[0].start_date
+                email_body=' شما در تاریخ ' + str(temp_time.year)+'/'+str(temp_time.month) + '/' + str(temp_time.day) + ' در ساعت '+ str(temp_time.hour)+':'+str(temp_time.minute) + ':' + str(temp_time.second) + ' برای مشاوره با آقای ' + str(consultant_time[0].consultant.first_name +' '+consultant_time[0].consultant.last_name) + ' با موفقیت زمان رزرو کردید.'
+                email = EmailMessage(
+                    email_subject,
+                    email_body,
+                    'noreply@semycolon.com',
+                    [request.user.email],
+                )
+                email.send(fail_silently=False)
 
                 return Response(data={"status": "ok"}, status=status.HTTP_200_OK)
             return Response({'status': 'Bad Request.'}, status=status.HTTP_400_BAD_REQUEST)
