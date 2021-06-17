@@ -23,10 +23,10 @@ def check_video_room_conditions(consultant_time, request):
         return False, Response({"error": "شناسه‌ی زمان‌مشاوره صحیح نیست"}, status=status.HTTP_400_BAD_REQUEST)
     else:
         consultant_time = consultant_time[0]
-    if consultant_time.user is None or consultant_time.consultant is None:
-        return False, Response({"error": "دسترسی به این زمان‌مشاوره را ندارید"}, status=status.HTTP_403_FORBIDDEN)
-    if consultant_time.user.id != request.user.id and consultant_time.consultant.id != request.user.id:
-        return False, Response({"error": "دسترسی به این زمان‌مشاوره را ندارید"}, status=status.HTTP_403_FORBIDDEN)
+    # if consultant_time.user is None or consultant_time.consultant is None:
+    #     return False, Response({"error": "این زمان رزرو نشده است"}, status=status.HTTP_403_FORBIDDEN)
+    # if consultant_time.user.id != request.user.id and consultant_time.consultant.id != request.user.id:
+    #     return False, Response({"error": "دسترسی به این زمان‌مشاوره را ندارید"}, status=status.HTTP_403_FORBIDDEN)
     if consultant_time.end_date < timezone.now():
         return False, Response({"error": "زمان مشاوره به‌اتمام رسیده‌است"}, status=status.HTTP_400_BAD_REQUEST)
     if consultant_time.start_date > timezone.now():
