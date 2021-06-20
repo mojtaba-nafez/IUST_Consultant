@@ -69,7 +69,17 @@ class UserSignupAPI(ObtainAuthToken):
                 UserProfile.objects.filter(id=user.id).update(is_active=True)
 
                 return Response({
-                    "status": "حساب کاربری شما فعال شد."
+                    "status": "حساب کاربری شما فعال شد.", 
+                    'data': {
+                        "id": user.id,
+                        "username": user.username,
+                        "avatar": user.avatar.url if user.avatar else None,
+                        "email": user.email,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "phone_number": user.phone_number,
+                        "user_type": user.user_type
+                    }
                 }, status=status.HTTP_200_OK)
                
             except IntegrityError as unique_constraint_error:
@@ -190,7 +200,17 @@ class ConsultantSignupAPI(ObtainAuthToken):
                 ConsultantProfile.objects.filter(id=user.id).update(is_active=True)
 
                 return Response({
-                    "status": "حساب کاربری شما فعال شد."
+                    "status": "حساب کاربری شما فعال شد.",
+                     'data': {
+                        "id": user.id,
+                        "username": user.username,
+                        "avatar": user.avatar.url if user.avatar else None,
+                        "email": user.email,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "phone_number": user.phone_number,
+                        "user_type": user.user_type
+                    }
                 }, status=status.HTTP_200_OK)
             except Exception as server_error:
                 return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -299,7 +299,7 @@ class InsertFakeData(APIView):
                                                                   first_name=consultant_first_name[j],
                                                                   last_name=consultant_last_name[j],
                                                                   email=consultant_email[j],
-                                                                  password=consultant_password[j], certificate="111", avatar=File(open(os.path.dirname(__file__)+'/files/channel_consultant/'+ str(j+1) +'.png', 'rb')))
+                                                                  password=consultant_password[j], certificate="111", avatar=File(open(os.path.dirname(__file__)+'/files/user/'+ str(j+1) +'.jpeg', 'rb')))
                     Token.objects.create(user=consultant)
                     consultants.append(consultant)
                     print('consultant ' + consultant_username[j] + ' created')

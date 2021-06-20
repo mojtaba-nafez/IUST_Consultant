@@ -132,6 +132,7 @@ elif 'test' in sys.argv or 'test_coverage' in sys.argv:
         }
     }
 else:
+    '''
     DATABASES = {
 	    'default': {
 	        'ENGINE': 'django.db.backends.postgresql',
@@ -149,7 +150,7 @@ else:
             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
         }
     }
-    
+    '''
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
