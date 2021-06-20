@@ -2,6 +2,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from rest_framework import serializers
+from django.core.validators import RegexValidator
+from django.utils import timezone
 
 
 def validate_phone_number(phone_number):
@@ -60,3 +62,9 @@ class ConsultantProfile(BaseUser):
 
     class Meta:
         verbose_name_plural = 'ConsultantProfile'
+
+
+class TemporalAuthenticationCode(models.Model):
+    code = models.CharField(max_length=5, validators=[RegexValidator(r'^[0-9]{5}$')])
+    email = models.EmailField(null=False, blank=False)
+    date = models.DateTimeField(default=timezone.now)

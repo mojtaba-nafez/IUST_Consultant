@@ -14,3 +14,10 @@ class ConsultantProfileAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ConsultantProfile, ConsultantProfileAdmin)
+
+
+class TemporalAuthenticationCodeAdmin(admin.ModelAdmin):
+    list_display = ['id','email', 'code', 'date']
+
+
+admin.site.register(TemporalAuthenticationCode, TemporalAuthenticationCodeAdmin)

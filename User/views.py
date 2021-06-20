@@ -5,8 +5,10 @@ from rest_framework.authtoken.views import ObtainAuthToken, APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.pagination import PageNumberPagination
 
+from rest_framework.pagination import PageNumberPagination
+from django.utils import timezone
+import datetime
 from channel.models import Channel
 from .serializers import *
 from django.views.generic import TemplateView
@@ -20,35 +22,109 @@ class SwaggerUI(TemplateView):
     def get(self, request, *args, **kwargs):
         return render(request, 'swagger-ui.html')
 
+class GetNewAuthenticationCode(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request, **kwargs):
+        try:
+            user = Token.objects.get(key=request.POST.get('token')).user
+            TemporalAuthenticationCode.objects.filter(date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
+            from random import randint
+            from django.core.mail import EmailMessage
+            code=str(randint(10**4, 10**5 -1))
+
+            TemporalAuthenticationCode.objects.create(code=code, email=user.email)
+
+            email_subject="ثبت نام در سایت مشاوره ای پرگار"
+            email_body="کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+            email = EmailMessage(
+                email_subject,
+                email_body,
+                'noreply@semycolon.com',
+                [user.email],
+            )
+            email.send(fail_silently=False)
+            return Response({"status": "کد دوباره با موفقیت به ایمیل شما ارسال شد."}, status=status.HTTP_200_OK)
+        except Exception as server_error:
+            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class UserSignupAPI(ObtainAuthToken):
     permission_classes = [AllowAny]
 
     def post(self, request, **kwargs):
-        try:
-            user_serializer = UserProfileSerializer(data=request.data)
-            if user_serializer.is_valid():
-                user = user_serializer.save()
-                token, created = Token.objects.get_or_create(user=user)
+        if request.POST.get('code'):
+            try:
+                if len(request.POST.get('code'))!=5:
+                    return Response({"error": "کد ورودی بایستی ۵ رقمی باشد."}, status=status.HTTP_400_BAD_REQUEST)
+                user = Token.objects.get(key=request.POST.get('token')).user
+                code=TemporalAuthenticationCode.objects.filter(email=user.email, code=request.POST.get('code'))
+                if len(code)==0:
+                    return Response({"error": "کد وارد شده اشتباه است."}, status=status.HTTP_400_BAD_REQUEST)
+
+                tow_minutes_ago = timezone.now() + datetime.timedelta(minutes=-2)
+                code = code.filter(date__gte=tow_minutes_ago)
+                if len(code)==0:
+                    return Response({"error":"مدت زمان اعتبار کد وارد شده گذشته است."}, status=status.HTTP_400_BAD_REQUEST)
+                TemporalAuthenticationCode.objects.filter(date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
+                UserProfile.objects.filter(id=user.id).update(is_active=True)
+
                 return Response({
-                    'token': token.key,
-                    'data': user_serializer.validated_data,
+                    "status": "حساب کاربری شما فعال شد."
                 }, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError as unique_constraint_error:
-            if unique_constraint_error.__str__().__contains__("username"):
-                return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
-            elif unique_constraint_error.__str__().__contains__("email"):
-                return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
-            elif unique_constraint_error.__str__().__contains__("phone_number"):
-                return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as server_error:
-            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+               
+            except IntegrityError as unique_constraint_error:
+                if unique_constraint_error.__str__().__contains__("username"):
+                    return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                elif unique_constraint_error.__str__().__contains__("email"):
+                    return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                elif unique_constraint_error.__str__().__contains__("phone_number"):
+                    return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as server_error:
+                return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            try:
+                user_serializer = UserProfileSerializer(data=request.data)
+                if user_serializer.is_valid():
+                    from random import randint
+                    from django.core.mail import EmailMessage
 
+                    code=str(randint(10**4, 10**5 -1))
 
+                    TemporalAuthenticationCode.objects.create(code=code, email=user_serializer.validated_data['email'])
+
+                    email_subject="ثبت نام در سایت مشاوره ای پرگار"
+                    email_body="کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+                    email = EmailMessage(
+                        email_subject,
+                        email_body,
+                        'noreply@semycolon.com',
+                        [user_serializer.validated_data['email']],
+                    )
+                    email.send(fail_silently=False)
+                    user = user_serializer.save()
+                    UserProfile.objects.filter(id=user.id).update(is_active=False)
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({
+                        'status': '.حساب کاربری شما ساخته شد، اما تا زمانی که ایمیل شما احراز نشود این حساب غیر فعال است.',
+                        'token': token.key,
+                        'data': user_serializer.data,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            except IntegrityError as unique_constraint_error:
+                if unique_constraint_error.__str__().__contains__("username"):
+                    return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                elif unique_constraint_error.__str__().__contains__("email"):
+                    print(unique_constraint_error)
+                    return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                elif unique_constraint_error.__str__().__contains__("phone_number"):
+                    return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as server_error:
+                return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class LoginAPI(ObtainAuthToken):
     permission_classes = []
 
@@ -97,29 +173,69 @@ class ConsultantSignupAPI(ObtainAuthToken):
     permission_classes = [AllowAny]
 
     def post(self, request, **kwargs):
-        try:
-            consultant_serializer = ConsultantProfileSerializer(data=request.data)
-            if consultant_serializer.is_valid():
-                user = consultant_serializer.save()
-                consultant_serializer = ConsultantProfileSerializer(user)
-                token, created = Token.objects.get_or_create(user=user)
+        if request.POST.get('code'):
+            try:
+                if len(request.POST.get('code'))!=5:
+                    return Response({"error": "کد ورودی بایستی ۵ رقمی باشد."}, status=status.HTTP_400_BAD_REQUEST)
+                user = Token.objects.get(key=request.POST.get('token')).user
+                code=TemporalAuthenticationCode.objects.filter(email=user.email, code=request.POST.get('code'))
+                if len(code)==0:
+                    return Response({"error": "کد وارد شده اشتباه است."}, status=status.HTTP_400_BAD_REQUEST)
+
+                tow_minutes_ago = timezone.now() + datetime.timedelta(minutes=-2)
+                code = code.filter(date__gte=tow_minutes_ago)
+                if len(code)==0:
+                    return Response({"error":"مدت زمان اعتبار کد وارد شده گذشته است."}, status=status.HTTP_400_BAD_REQUEST)
+                TemporalAuthenticationCode.objects.filter(date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
+                ConsultantProfile.objects.filter(id=user.id).update(is_active=True)
+
                 return Response({
-                    'token': token.key,
-                    'data': consultant_serializer.data,
+                    "status": "حساب کاربری شما فعال شد."
                 }, status=status.HTTP_200_OK)
-            else:
-                return Response({'error': consultant_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-        except IntegrityError as unique_constraint_error:
-            if unique_constraint_error.__str__().__contains__("username"):
-                return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
-            elif unique_constraint_error.__str__().__contains__("email"):
-                return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
-            elif unique_constraint_error.__str__().__contains__("phone_number"):
-                return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        except Exception as server_error:
-            return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as server_error:
+                return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        else:
+            try:
+                consultant_serializer = ConsultantProfileSerializer(data=request.data)
+                if consultant_serializer.is_valid():
+                    from random import randint
+                    from django.core.mail import EmailMessage
+
+                    code=str(randint(10**4, 10**5 -1))
+
+                    TemporalAuthenticationCode.objects.create(code=code, email=request.POST.get('email'))
+
+                    email_subject="ثبت نام در سایت مشاوره ای پرگار"
+                    email_body="کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+                    email = EmailMessage(
+                        email_subject,
+                        email_body,
+                        'noreply@semycolon.com',
+                        [request.POST.get('email')],
+                    )
+                    email.send(fail_silently=False)
+                    user = consultant_serializer.save()
+                    ConsultantProfile.objects.filter(id=user.id).update(is_active=False)
+                    token, created = Token.objects.get_or_create(user=user)
+                    return Response({
+                        'status': '.حساب کاربری شما ساخته شد، اما تا زمانی که ایمیل شما احراز نشود این حساب غیر فعال است.',
+                        'token': token.key,
+                        'data': consultant_serializer.data,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': consultant_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            except IntegrityError as unique_constraint_error:
+                if unique_constraint_error.__str__().__contains__("username"):
+                    return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                elif unique_constraint_error.__str__().__contains__("email"):
+                    return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                elif unique_constraint_error.__str__().__contains__("phone_number"):
+                    return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as server_error:
+                return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UserProfileAPI(APIView):

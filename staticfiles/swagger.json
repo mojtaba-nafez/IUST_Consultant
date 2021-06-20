@@ -107,8 +107,129 @@
                 "phone_number": {
                   "type": "string"
                 }
+              },
+            }
+          }
+        ],
+        
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    },
+                    "user_type": {
+                      "type": "string"
+                    },
+                    "private_profile": {
+                      "type": "boolean"
+                    },
+                    "avatar": {
+                      "type": "boolean"
+                    }
+                    
+                  }
+                },
               }
             }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+      "/user/signup-activate-email/": {
+        "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "create a new user",
+        "operationId": "createNormalUserEmailActivate",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "code",
+            "required": true,
+            "type": "string"
+          },
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+        }
+      },
+    "/user/resent-code/": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "create a new user",
+        "operationId": "createUserResentEmailCode",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "token",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -117,21 +238,9 @@
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
+                "status": {
                   "type": "string"
                 },
-                "firstName": {
-                  "type": "string"
-                },
-                "lastName": {
-                  "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                },
-                "phone_number": {
-                  "type": "string"
-                }
               }
             }
           },
@@ -186,6 +295,7 @@
         }
       }
     },
+    
     "/user/channel-role/{channelId}/": {
       "get": {
         "tags": [
@@ -304,19 +414,127 @@
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
+                "status": {
                   "type": "string"
                 },
-                "firstName": {
+                "token": {
                   "type": "string"
                 },
-                "lastName": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "phone_number": {
+                      "type": "string"
+                    },
+                    "user_type": {
+                      "type": "string"
+                    },
+                    "private_profile": {
+                      "type": "boolean"
+                    },
+                    "avatar": {
+                      "type": "boolean"
+                    }
+                    
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/consultant/signup-activate-email/": {
+      "post": {
+        "tags": [
+          "Consultant"
+        ],
+        "summary": "create a new user",
+        "operationId": "createConsultantEmailAuth",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "formData",
+            "name": "code",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
                   "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                },
-                "phone_number": {
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+     "/consultant/resent-code/": {
+      "post": {
+        "tags": [
+          "Consultant"
+        ],
+        "summary": "create a new user",
+        "operationId": "createConsultantResentEmailCode",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
                   "type": "string"
                 }
               }
