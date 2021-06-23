@@ -22,20 +22,41 @@ class SwaggerUI(TemplateView):
     def get(self, request, *args, **kwargs):
         return render(request, 'swagger-ui.html')
 
+
+def send_authenticate_code_with_email(user):
+    from random import randint
+    from django.core.mail import EmailMessage
+    code = str(randint(10 ** 4, 10 ** 5 - 1))
+
+    TemporalAuthenticationCode.objects.filter(email=user.email).update(code=code)
+
+    email_subject = "ثبت نام در سایت مشاوره ای پرگار"
+    email_body = "کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+    email = EmailMessage(
+        email_subject,
+        email_body,
+        'noreply@semycolon.com',
+        [user.email],
+    )
+    email.send(fail_silently=False)
+
+
 class GetNewAuthenticationCode(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request, **kwargs):
         try:
             user = Token.objects.get(key=request.POST.get('token')).user
-            TemporalAuthenticationCode.objects.filter(date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
+            TemporalAuthenticationCode.objects.filter(
+                date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
             from random import randint
             from django.core.mail import EmailMessage
-            code=str(randint(10**4, 10**5 -1))
+            code = str(randint(10 ** 4, 10 ** 5 - 1))
 
             TemporalAuthenticationCode.objects.create(code=code, email=user.email)
 
-            email_subject="ثبت نام در سایت مشاوره ای پرگار"
-            email_body="کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+            email_subject = "ثبت نام در سایت مشاوره ای پرگار"
+            email_body = "کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
             email = EmailMessage(
                 email_subject,
                 email_body,
@@ -54,24 +75,26 @@ class UserSignupAPI(ObtainAuthToken):
     def post(self, request, **kwargs):
         if request.POST.get('code'):
             try:
-                if len(request.POST.get('code'))!=5:
+                if len(request.POST.get('code')) != 5:
                     return Response({"error": "کد ورودی بایستی ۵ رقمی باشد."}, status=status.HTTP_400_BAD_REQUEST)
                 user = Token.objects.get(key=request.POST.get('token')).user
-                code=TemporalAuthenticationCode.objects.filter(email=user.email, code=request.POST.get('code'))
-                if len(code)==0:
+                code = TemporalAuthenticationCode.objects.filter(email=user.email, code=request.POST.get('code'))
+                if len(code) == 0:
                     return Response({"error": "کد وارد شده اشتباه است."}, status=status.HTTP_400_BAD_REQUEST)
 
                 tow_minutes_ago = timezone.now() + datetime.timedelta(minutes=-2)
                 code = code.filter(date__gte=tow_minutes_ago)
-                if len(code)==0:
-                    return Response({"error":"مدت زمان اعتبار کد وارد شده گذشته است."}, status=status.HTTP_400_BAD_REQUEST)
-                TemporalAuthenticationCode.objects.filter(date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
+                if len(code) == 0:
+                    return Response({"error": "مدت زمان اعتبار کد وارد شده گذشته است."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                TemporalAuthenticationCode.objects.filter(
+                    date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
                 UserProfile.objects.filter(id=user.id).update(is_active=True)
 
                 return Response({
                     "status": "حساب کاربری شما فعال شد."
                 }, status=status.HTTP_200_OK)
-               
+
             except IntegrityError as unique_constraint_error:
                 if unique_constraint_error.__str__().__contains__("username"):
                     return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
@@ -90,12 +113,12 @@ class UserSignupAPI(ObtainAuthToken):
                     from random import randint
                     from django.core.mail import EmailMessage
 
-                    code=str(randint(10**4, 10**5 -1))
+                    code = str(randint(10 ** 4, 10 ** 5 - 1))
 
                     TemporalAuthenticationCode.objects.create(code=code, email=user_serializer.validated_data['email'])
 
-                    email_subject="ثبت نام در سایت مشاوره ای پرگار"
-                    email_body="کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+                    email_subject = "ثبت نام در سایت مشاوره ای پرگار"
+                    email_body = "کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
                     email = EmailMessage(
                         email_subject,
                         email_body,
@@ -125,6 +148,8 @@ class UserSignupAPI(ObtainAuthToken):
                     return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             except Exception as server_error:
                 return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class LoginAPI(ObtainAuthToken):
     permission_classes = []
 
@@ -140,18 +165,26 @@ class LoginAPI(ObtainAuthToken):
                     return Response({'error': 'کاربری با این مشخصات وجود ندارد'}, status=status.HTTP_400_BAD_REQUEST)
                 if user[0].password != serializer.validated_data['password']:
                     return Response({'error': 'رمز‌عبور صحیح نیست'}, status=status.HTTP_400_BAD_REQUEST)
-                token, created = Token.objects.get_or_create(user=user[0])
-                if user[0].user_type == "normal_user":
-                    user = UserProfile.objects.filter(baseuser_ptr=user[0])
-                    return_data = UserProfileSerializer(user[0])
-                else:
-                    user = ConsultantProfile.objects.filter(baseuser_ptr=user[0])
-                    return_data = ConsultantProfileSerializer(user[0])
+                if user[0].is_active:
+                    token, created = Token.objects.get_or_create(user=user[0])
+                    if user[0].user_type == "normal_user":
+                        user = UserProfile.objects.filter(baseuser_ptr=user[0])
+                        return_data = UserProfileSerializer(user[0])
+                    else:
+                        user = ConsultantProfile.objects.filter(baseuser_ptr=user[0])
+                        return_data = ConsultantProfileSerializer(user[0])
 
-                return Response({
-                    'token': token.key,
-                    'data': return_data.data,
-                }, status=status.HTTP_200_OK)
+                    return Response({
+                        'token': token.key,
+                        'data': return_data.data,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    send_authenticate_code_with_email(user[0])
+                    return Response({
+                        'token': "",
+                        'data': "شما ایمیل خود را تایید نکرده اید. کد جدید به ایمیل شما ارسال شده‌است.",
+                    }, status=status.HTTP_406_NOT_ACCEPTABLE)
+
             else:
                 return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as server_error:
@@ -175,18 +208,20 @@ class ConsultantSignupAPI(ObtainAuthToken):
     def post(self, request, **kwargs):
         if request.POST.get('code'):
             try:
-                if len(request.POST.get('code'))!=5:
+                if len(request.POST.get('code')) != 5:
                     return Response({"error": "کد ورودی بایستی ۵ رقمی باشد."}, status=status.HTTP_400_BAD_REQUEST)
                 user = Token.objects.get(key=request.POST.get('token')).user
-                code=TemporalAuthenticationCode.objects.filter(email=user.email, code=request.POST.get('code'))
-                if len(code)==0:
+                code = TemporalAuthenticationCode.objects.filter(email=user.email, code=request.POST.get('code'))
+                if len(code) == 0:
                     return Response({"error": "کد وارد شده اشتباه است."}, status=status.HTTP_400_BAD_REQUEST)
 
                 tow_minutes_ago = timezone.now() + datetime.timedelta(minutes=-2)
                 code = code.filter(date__gte=tow_minutes_ago)
-                if len(code)==0:
-                    return Response({"error":"مدت زمان اعتبار کد وارد شده گذشته است."}, status=status.HTTP_400_BAD_REQUEST)
-                TemporalAuthenticationCode.objects.filter(date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
+                if len(code) == 0:
+                    return Response({"error": "مدت زمان اعتبار کد وارد شده گذشته است."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                TemporalAuthenticationCode.objects.filter(
+                    date__lt=(timezone.now() + datetime.timedelta(minutes=-2))).delete()
                 ConsultantProfile.objects.filter(id=user.id).update(is_active=True)
 
                 return Response({
@@ -202,12 +237,12 @@ class ConsultantSignupAPI(ObtainAuthToken):
                     from random import randint
                     from django.core.mail import EmailMessage
 
-                    code=str(randint(10**4, 10**5 -1))
+                    code = str(randint(10 ** 4, 10 ** 5 - 1))
 
                     TemporalAuthenticationCode.objects.create(code=code, email=request.POST.get('email'))
 
-                    email_subject="ثبت نام در سایت مشاوره ای پرگار"
-                    email_body="کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
+                    email_subject = "ثبت نام در سایت مشاوره ای پرگار"
+                    email_body = "کد ورود :   \n               " + code + ' \n این کد تا دو دقیقه دارای اعتبار می باشد. \n  با تشکر \n مجموعه ی پرگار.'
                     email = EmailMessage(
                         email_subject,
                         email_body,
@@ -340,7 +375,7 @@ class SearchConsultantsAPI(APIView, SearchConsultantPagination):
                                                                                                    many=True).data)
                 else:
                     consultant_serializer = SearchConsultantSerializer(consultant, many=True)
-           
+
             return Response(consultant_serializer.data, status=status.HTTP_200_OK)
         except:
             return Response({'status': "Internal Server Error, We'll Check it later!"},
