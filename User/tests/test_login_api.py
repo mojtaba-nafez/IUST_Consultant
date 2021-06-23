@@ -20,8 +20,12 @@ class PublicSignUpTest(TestCase):
                                                       password="123456",
                                                       phone_number="09176273746", first_name="hamid",
                                                       last_name="azarbad")
+        self.not_acceptable_normal_user = UserProfile.objects.create(username="not_acceptable", email="hamidreza.azarbad77@gmail.com",
+                                                      password="123456",
+                                                      phone_number="09176273716", first_name="hamid",
+                                                      last_name="azarbad", is_active=False)
 
-    def test_sign_up_invalid_username_and_email(self):
+    def test_sign_in_invalid_username_and_email(self):
         payload = {
             "email_username": "test",
             "password": "123456"
@@ -30,19 +34,31 @@ class PublicSignUpTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), {"error": "کاربری با این مشخصات وجود ندارد"})
 
-    def test_sign_up_invalid_password(self):
+    def test_sign_in_invalid_password(self):
         payload = {
-            "email_username": "consultant",
-            "password": "1234567"
+            "email_username": self.consultant.username,
+            "password": self.consultant.password + "1234546"
         }
         response = self.client.post(self.user_login_url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(json.loads(response.content), {"error": "رمز‌عبور صحیح نیست"})
 
-    def test_sign_up_successfully(self):
+    def test_sign_in_not_acceptable_user(self):
         payload = {
-            "email_username": "consultant",
-            "password": "123456"
+            "email_username": self.not_acceptable_normal_user.username,
+            "password": self.not_acceptable_normal_user.password
+        }
+        response = self.client.post(self.user_login_url, payload)
+        self.assertEqual(response.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(json.loads(response.content), {
+            "token": "",
+            "data": "شما ایمیل خود را تایید نکرده اید. کد جدید به ایمیل شما ارسال شده‌است.",
+        })
+
+    def test_sign_in_successfully(self):
+        payload = {
+            "email_username": self.consultant.username,
+            "password": self.consultant.password
         }
         response = self.client.post(self.user_login_url, payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
