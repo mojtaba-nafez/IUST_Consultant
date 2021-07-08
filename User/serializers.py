@@ -7,7 +7,10 @@ from django.core.validators import RegexValidator
 
 class LoginSerializer(serializers.Serializer):
     email_username = serializers.CharField(required=True, allow_blank=False, allow_null=False)
-    password = serializers.CharField(required=True, allow_null=False, allow_blank=False, min_length=6)
+    password = serializers.CharField(required=True, allow_null=False, allow_blank=False, min_length=6, max_length=128,
+                                     error_messages={
+                                         "length": "طول رمز حداقل ۶ کاراکتر باید باشد",
+                                     }, )
 
 
 class BaseUserSerializer(serializers.Serializer):
@@ -18,8 +21,10 @@ class BaseUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(required=True, allow_null=False, allow_blank=False)
     last_name = serializers.CharField(required=True, allow_null=False, allow_blank=False)
     phone_number = serializers.CharField(required=True, allow_blank=False, allow_null=False)
-    password = serializers.CharField(required=True, allow_null=False, allow_blank=False, min_length=6, max_length=25,
-                                     write_only=True)
+    password = serializers.CharField(required=True, allow_null=False, allow_blank=False, min_length=6, max_length=128,
+                                     write_only=True, error_messages={
+            "length": "طول رمز حداقل ۶ کاراکتر باید باشد",
+        }, )
     private_profile = serializers.BooleanField(default=False, allow_null=False)
 
     def update(self, instance, validated_data):
@@ -80,4 +85,5 @@ class SearchConsultantSerializer(BaseUserSerializer):
     )
     user_type = serializers.ChoiceField(choices=consultant_types, required=True)
     count_of_all_comments = serializers.IntegerField(default=0, validators=[MinValueValidator(0)])
-    satisfaction_percentage = serializers.IntegerField(default=0,validators=[MinValueValidator(0), MaxValueValidator(100)])
+    satisfaction_percentage = serializers.IntegerField(default=0,
+                                                       validators=[MinValueValidator(0), MaxValueValidator(100)])
