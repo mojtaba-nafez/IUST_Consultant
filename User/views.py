@@ -353,8 +353,10 @@ class AnotherUserProfileAPI(APIView):
     def get(self, request, username):
         try:
             user = ConsultantProfile.objects.filter(username=username)
+            consultant_channel = None
             if len(user) != 0:
                 user_serializer = ConsultantProfileSerializer(user[0])
+                consultant_channel = Channel.objects.filter(consultant=user[0])[0]
             else:
                 user = UserProfile.objects.filter(username=username)
                 if len(user) == 0:
@@ -363,6 +365,8 @@ class AnotherUserProfileAPI(APIView):
                 else:
                     user_serializer = UserProfileSerializer(user[0])
             user_profile = user_serializer.data
+            if consultant_channel is not None:
+                user_profile['channel_id'] = consultant_channel.id
             del user_profile['email']
             del user_profile['phone_number']
             return Response(user_profile, status=status.HTTP_200_OK)

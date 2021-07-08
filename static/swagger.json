@@ -107,11 +107,10 @@
                 "phone_number": {
                   "type": "string"
                 }
-              },
+              }
             }
           }
         ],
-        
         "responses": {
           "200": {
             "description": "OK",
@@ -154,9 +153,8 @@
                     "avatar": {
                       "type": "boolean"
                     }
-                    
                   }
-                },
+                }
               }
             }
           },
@@ -166,8 +164,8 @@
         }
       }
     },
-      "/user/signup-activate-email/": {
-        "post": {
+    "/user/signup-activate-email/": {
+      "post": {
         "tags": [
           "User"
         ],
@@ -191,7 +189,7 @@
             "name": "code",
             "required": true,
             "type": "string"
-          },
+          }
         ],
         "responses": {
           "200": {
@@ -209,8 +207,8 @@
             "description": "Invalid input"
           }
         }
-        }
-      },
+      }
+    },
     "/user/resent-code/": {
       "post": {
         "tags": [
@@ -240,7 +238,7 @@
               "properties": {
                 "status": {
                   "type": "string"
-                },
+                }
               }
             }
           },
@@ -295,7 +293,6 @@
         }
       }
     },
-    
     "/user/channel-role/{channelId}/": {
       "get": {
         "tags": [
@@ -450,7 +447,6 @@
                     "avatar": {
                       "type": "boolean"
                     }
-                    
                   }
                 }
               }
@@ -507,7 +503,7 @@
         }
       }
     },
-     "/consultant/resent-code/": {
+    "/consultant/resent-code/": {
       "post": {
         "tags": [
           "Consultant"
@@ -850,6 +846,9 @@
                   "type": "string"
                 },
                 "user_type": {
+                  "type": "string"
+                },
+                "channel_id": {
                   "type": "string"
                 }
               }

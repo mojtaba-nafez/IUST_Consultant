@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework.utils import json
-
+from channel.models import Channel
 from User.models import *
 
 
@@ -25,6 +25,10 @@ class PrivateUserProfileTest(TestCase):
                                                password="123456",
                                                phone_number="09176273746", first_name="hamid",
                                                last_name="azarbad", avatar="File(avatar)", )
+
+        self.consultant_channel = Channel.objects.create(name="rasoul", description="immegrate to Germany",
+                                                         invite_link='Immigrate-Germany',
+                                                         consultant=self.consultant)
 
     def test_un_authorize_client(self):
         response = self.client.put(self.url)
@@ -122,11 +126,12 @@ class PrivateUserProfileTest(TestCase):
 
     def test_get_another_profile(self):
         self.client.force_authenticate(self.user)
-        response = self.client.get(self.url + "consultant/")
+        response = self.client.get(self.url + self.consultant.username + "/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual({'id': 1, 'username': self.consultant.username,
                           'avatar': 'https://res.cloudinary.com/iust/image/upload/File%28avatar%29',
                           'first_name': self.consultant.first_name, 'last_name': self.consultant.last_name,
                           'private_profile': False, 'user_type': 'Immigration',
-                          'certificate': 'https://res.cloudinary.com/iust/image/upload/File%28certificate%29'},
+                          'certificate': 'https://res.cloudinary.com/iust/image/upload/File%28certificate%29',
+                          "channel_id": self.consultant_channel.id},
                          json.loads(response.content))
