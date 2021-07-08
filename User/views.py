@@ -92,7 +92,7 @@ class UserSignupAPI(ObtainAuthToken):
                 UserProfile.objects.filter(id=user.id).update(is_active=True)
 
                 return Response({
-                    "status": "حساب کاربری شما فعال شد.", 
+                    "status": "حساب کاربری شما فعال شد.",
                     'data': {
                         "id": user.id,
                         "username": user.username,
@@ -236,7 +236,7 @@ class ConsultantSignupAPI(ObtainAuthToken):
 
                 return Response({
                     "status": "حساب کاربری شما فعال شد.",
-                     'data': {
+                    'data': {
                         "id": user.id,
                         "username": user.username,
                         "avatar": user.avatar.url if user.avatar else None,
@@ -334,6 +334,15 @@ class UserProfileAPI(APIView):
                 return Response(user_serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response({"error": user_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        except IntegrityError as unique_constraint_error:
+            if unique_constraint_error.__str__().__contains__("username"):
+                return Response({"error": "نام‌کاربری تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unique_constraint_error.__str__().__contains__("email"):
+                return Response({"error": "ایمیل تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            elif unique_constraint_error.__str__().__contains__("phone_number"):
+                return Response({"error": "شماره‌تلفن تکراری است"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response(unique_constraint_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as server_error:
             return Response(server_error.__str__(), status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

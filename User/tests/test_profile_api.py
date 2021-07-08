@@ -17,7 +17,7 @@ class PrivateUserProfileTest(TestCase):
         # certificate = open(base_address + '/certificate/consultant.pdf', 'rb')
         self.consultant = ConsultantProfile.objects.create(username="consultant", user_type='Immigration',
                                                            phone_number="09184576125", first_name="hossein",
-                                                           last_name="masoudi", email="test1@gmailcom",
+                                                           last_name="masoudi", email="test1@gmail.com",
                                                            password="123456", avatar="File(avatar)",
                                                            certificate="File(certificate)")
         # certificate.close()
@@ -71,21 +71,47 @@ class PrivateUserProfileTest(TestCase):
         new_user = UserProfile.objects.filter(username='normal_user')[0]
         self.assertEqual(new_user.phone_number, "09123988601")
 
-    def test_put_consultant_profile(self):
-        self.client.force_authenticate(self.user)
+    def test_put_normal_user_repetitious_username(self):
+        self.client.force_authenticate(self.consultant)
         payload = {
             'username': self.user.username,
-            'email': self.user.email,
-            'first_name': self.user.first_name,
-            'last_name': self.user.last_name,
-            'password': self.user.password,
-            'phone_number': "09123988601",
+            'email': self.consultant.email,
+            'first_name': self.consultant.first_name,
+            'last_name': self.consultant.last_name,
+            'password': self.consultant.password,
+            'phone_number': self.consultant.phone_number,
         }
-        response = self.client.put(self.url, payload, )
+        response = self.client.put(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "نام‌کاربری تکراری است"})
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        new_user = UserProfile.objects.filter(username='normal_user')[0]
-        self.assertEqual(new_user.phone_number, "09123988601")
+    def test_put_normal_user_repetitious_email(self):
+        self.client.force_authenticate(self.consultant)
+        payload = {
+            'username': self.consultant.username,
+            'email': self.user.email,
+            'first_name': self.consultant.first_name,
+            'last_name': self.consultant.last_name,
+            'password': self.consultant.password,
+            'phone_number': self.consultant.phone_number,
+        }
+        response = self.client.put(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "ایمیل تکراری است"})
+
+    def test_put_normal_user_repetitious_phone_number(self):
+        self.client.force_authenticate(self.consultant)
+        payload = {
+            'username': self.consultant.username,
+            'email': self.consultant.email,
+            'first_name': self.consultant.first_name,
+            'last_name': self.consultant.last_name,
+            'password': self.consultant.password,
+            'phone_number': self.user.phone_number,
+        }
+        response = self.client.put(self.url, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(json.loads(response.content), {"error": "شماره‌تلفن تکراری است"})
 
     def test_get_another_profile_invalid_username(self):
         self.client.force_authenticate(self.user)
