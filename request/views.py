@@ -51,13 +51,13 @@ class ApplicantRequestAPI(APIView):
                                 status=status.HTTP_403_FORBIDDEN)
             recipient_request = BaseUser.objects.filter(username=request_serializer.validated_data['target_user'])
             if len(recipient_request) == 0:
-                return Response({"error": "This username is not valid"}, status=status.HTTP_400_BAD_REQUEST)
-            if len(Channel.subscribers.through.objects.filter(user=recipient_request[0])) != 0:
-                return Response({"error": "This username is already subscriber of this channel"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "نام کاربری موجود نیست"}, status=status.HTTP_400_BAD_REQUEST)
+            # if len(Channel.subscribers.through.objects.filter(user=recipient_request[0])) != 0:
+            #     return Response({"error": "This username is already subscriber of this channel"},
+            #                     status=status.HTTP_400_BAD_REQUEST)
             if len(JoinChannelRequest.objects.filter(channel_id=request_serializer.validated_data['channel'],
                                                      target_user=recipient_request[0])) != 0:
-                return Response({"error": "You already send request for this user"},
+                return Response({"error": "شما برای این کاربر درخواست ارسال کرده اید"},
                                 status=status.HTTP_400_BAD_REQUEST)
             request_serializer.validated_data['channel'] = channel[0]
             request_serializer.validated_data['target_user'] = recipient_request[0]
@@ -146,7 +146,7 @@ class ResponderRequestAPI(APIView):
             answer_serializer = AnswerSerializer(user_request[0], data=request.data)
             if answer_serializer.is_valid():
                 if answer_serializer.validated_data['accept'] and request.data['request_type'] == 'secretary':
-                    user_request[0].channel.consultant.my_secretaries.add(secretary)
+                    user_request[0].channel.consultant.my_secretaries.add(request.user)
                 if answer_serializer.validated_data['accept'] and request.data['request_type'] == 'join_channel':
                     user_request[0].channel.subscribers.add(request.user)
                 user_request[0].delete()
