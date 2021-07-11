@@ -70,6 +70,7 @@ class ReserveConsultantTimeSerializer(serializers.Serializer):
                                         error_messages={
                                             "length": "توضیحات حداکثر 500 کاراکتر میتواند باشد",
                                         }, )
+    id = serializers.IntegerField(read_only=True, allow_null=False)
 
 
 class ReservatorField(serializers.RelatedField):

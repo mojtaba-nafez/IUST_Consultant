@@ -23,6 +23,7 @@ class Reserve(APIView):
         try:
             serializer = ReserveConsultantTimeSerializer(data=request.data)
             if serializer.is_valid():
+                '''
                 consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID)
 
                 if len(consultant_time) == 0:
@@ -42,6 +43,19 @@ class Reserve(APIView):
 
                 if len(consultant_time) == 0:
                     return Response("this consultant is busy in this time.", status=status.HTTP_404_NOT_FOUND)
+                '''
+                consultant_time = ConsultantTime.objects.filter(consultant__id=ConsultantID)
+                if len(consultant_time) == 0:
+                    return Response(" مشاور زمانی برای مشاوره ندارد!", status=status.HTTP_400_BAD_REQUEST)
+                
+                consultant_time = ConsultantTime.objects.filter(id=request.data['id'])
+                if len(consultant_time) == 0:
+                    return Response("چنین زمانی برای مشاوره وجود ندارد.!", status=status.HTTP_400_BAD_REQUEST)
+                
+                if consultant_time[0].user!=None:
+                    return Response("متاسفانه این زمان قبلا پر شده است!", status=status.HTTP_400_BAD_REQUEST)
+                
+
 
                 ConsultantTime.objects.filter(id=consultant_time[0].id).update(user=request.user.id,
                                                                                title=serializer.data.get('title'),
@@ -94,24 +108,28 @@ class Reserve(APIView):
                 data["obsolete_reserved_time"].append({
                     "start_time": datetime.time(obj.start_date.hour, obj.start_date.minute, obj.start_date.second),
                     "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
+                    "id": obj.id,
                 })
             for i in range(len(obsolete_empty_time)):
                 obj = obsolete_empty_time[i]
                 data["obsolete_empty_time"].append({
                     "start_time": datetime.time(obj.start_date.hour, obj.start_date.minute, obj.start_date.second),
                     "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
+                    "id": obj.id,
                 })
             for i in range(len(empty_time)):
                 obj = empty_time[i]
                 data["empty_time"].append({
                     "start_time": datetime.time(obj.start_date.hour, obj.start_date.minute, obj.start_date.second),
                     "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
+                    "id": obj.id,
                 })
             for i in range(len(filled_time)):
                 obj = filled_time[i]
                 data["reserved_time"].append({
                     "start_time": datetime.time(obj.start_date.hour, obj.start_date.minute, obj.start_date.second),
                     "end_time": datetime.time(obj.end_date.hour, obj.end_date.minute, obj.end_date.second),
+                    "id": obj.id,
                 })
             return Response({"data": data}, status=status.HTTP_200_OK)
         except Exception as server_error:
